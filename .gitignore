@@ -1,4 +1,13 @@
 *.log
+.DS_Store
+
+### Maven & Build ###
+target/
+*.jar
+*.war
+*.class
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
 .apt_generated
