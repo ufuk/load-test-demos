@@ -1,10 +1,19 @@
 package io.github.ufuk.spring.springboot2demo;
 
-import lombok.Data;
-
-@Data
 public class DemoSumResponse {
 
-    private final Long result;
+    private Long result;
+
+    public DemoSumResponse(Long result) {
+        this.result = result;
+    }
+
+    public Long getResult() {
+        return result;
+    }
+
+    public void setResult(Long result) {
+        this.result = result;
+    }
 
 }

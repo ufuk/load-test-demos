@@ -1,21 +1,38 @@
 # load-test-demos
 
-Install [k6](https://k6.io/docs/) before run tests:
+A benchmark and load-testing demonstration comparing memory usage and response performance across different frameworks
+and runtimes:
+
+- [go-echo-demo](go-echo-demo): Go 1.27 with Echo v5
+- [spring-boot-2-demo](spring-boot-2-demo): Spring Boot 2.7.x (Java 21)
+- [spring-boot-3-demo](spring-boot-3-demo): Spring Boot 3.5.x (Java 25)
+- [spring-boot-4-demo](spring-boot-4-demo): Spring Boot 4.1.x (Java 26)
+
+All demo services expose a common endpoint: `GET /demo/sum?value1=3&value2=5` which returns `{"result": 8}` after a
+100ms artificial delay.
+
+## Prerequisites
+
+Install [k6](https://k6.io/docs/) before running tests:
 
 ```bash
 brew install k6
 ```
 
-Run load test while monitoring memory usage:
+## Running Load Tests
+
+Run the load test while monitoring memory usage:
 
 ```bash
-./run-load-test.sh -p <process_id> -s <k6_script_file_name> -c <concurrent_user_count> -t <total_seconds>
+./run_load_test.sh -p <process_id> -s <k6_script_file_name> -c <concurrent_user_count> -t <total_seconds>
 
 # For example:
 # ./run_load_test.sh -p 46852 -s k6-script-demo-sum-endpoint.js -c 100 -t 30
 ```
 
-To monitor a process' memory usage, you can run process_memory_stats.sh individually:
+## Running Individual Scripts
+
+To monitor a process' memory usage individually:
 
 ```bash
 ./process_memory_stats.sh -p <process_id> -t <total_seconds>
@@ -24,7 +41,7 @@ To monitor a process' memory usage, you can run process_memory_stats.sh individu
 # ./process_memory_stats.sh -p 46852 -t 30
 ```
 
-To start a k6 load test script with a certain amount of concurrent users for a few seconds individually:
+To start a k6 load test script individually:
 
 ```bash
 k6 run --vus <concurrent_user_count> --duration <total_seconds>s <k6_script_file_name>

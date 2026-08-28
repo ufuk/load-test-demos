@@ -1,13 +1,13 @@
-package io.github.ufuk.spring.springboot2demo;
+package io.github.ufuk.spring.springboot4demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SpringBoot2DemoApplication {
+public class SpringBoot4DemoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringBoot2DemoApplication.class, args);
+        SpringApplication.run(SpringBoot4DemoApplication.class, args);
     }
 
 }

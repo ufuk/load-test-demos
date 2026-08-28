@@ -1,15 +1,15 @@
-# spring-boot-3-demo
+# go-echo-demo
 
-Demo project for Spring Boot 3.5.x.
+Demo project for Go with Echo v5 framework.
 
 ## Prerequisites
 
-- Java 25
+- Go 1.27
 
 ## Run
 
 ```bash
-./mvnw spring-boot:run
+go run main.go
 ```
 
 ## Endpoint

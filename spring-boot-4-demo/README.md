@@ -1,10 +1,10 @@
-# spring-boot-3-demo
+# spring-boot-4-demo
 
-Demo project for Spring Boot 3.5.x.
+Demo project for Spring Boot 4.1.x.
 
 ## Prerequisites
 
-- Java 25
+- Java 26
 
 ## Run
 
