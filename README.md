@@ -402,8 +402,11 @@ architecture trade-offs:
 ### Test Scenario 5: Memory Scaling Investigation (1000 VUs / 30s / I/O-Bound with 1GB RAM)
 
 > **Environment:** Docker Containers (`--cpus 2 --memory 1024m`) on Apple Silicon Host.
-> 
-> *Investigating standard JVM throughput when Young Generation GC allocation pressure is eliminated by scaling memory from 512MB to 1GB.*
+>
+> *Investigating how raw throughput scales when total container memory is doubled from 512MB to 1GB, using OpenJDK
+default heap ergonomics (`MaxRAMPercentage=25` → 256MB heap). Even with the 25% default cap, extra OS-level breathing
+room reduces GC frequency for native and CDS configurations. See Scenario 6 for the effect of fully unlocking heap
+allocation.*
 
 ```text
 ============================================================================================================================================
@@ -423,25 +426,39 @@ Limits   : CPU: 2 cores | RAM: 1024m (1GB)
 ```
 
 > **📌 Standout Metrics & Highlights:**
-> - 🚀 **Spring Boot 4.1 JIT Breakthrough:** Doubling container RAM to 1GB unlocked **`7,509 RPS`** at **`226.5 ms P95`** for `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)`—a **+93% throughput surge** over its 512MB run (`3,891 RPS`), reaching **77.6% of Go's maximum theoretical throughput**!
-> - ⚡ **Spring Boot 3.5 +155% Surge:** `Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)` jumped from `2,227 RPS` to **`5,687 RPS`** (a 2.5x throughput leap) and dropped P95 latency from `786.2 ms` down to **`301.0 ms`**.
-> - 🍃 **GraalVM Native Resilience:** `Spring Boot 4.1 GraalVM Native Virtual` scaled from `6,420 RPS` to **`6,905 RPS`** at **`217.9 ms P95`**, proving its ultra-efficient memory characteristics across both 512MB and 1GB footprints.
+> - 🚀 **Spring Boot 4.1 JIT Breakthrough:** Doubling container RAM to 1GB unlocked **`7,509 RPS`** at **`226.5 ms P95`**
+    for `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)`—a **+93% throughput surge** over its 512MB run
+    (`3,891 RPS`), reaching **77.6% of Go's maximum theoretical throughput**!
+> - ⚡ **Spring Boot 3.5 +155% Surge:** `Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)` jumped from `2,227 RPS` to **
+    `5,687 RPS`** (a 2.5x throughput leap) and dropped P95 latency from `786.2 ms` down to **`301.0 ms`**.
+> - 🍃 **GraalVM Native Resilience:** `Spring Boot 4.1 GraalVM Native Virtual` scaled from `6,420 RPS` to **`6,905 RPS`**
+    at **`217.9 ms P95`**, proving its ultra-efficient memory characteristics across both 512MB and 1GB footprints.
 > - 🛡️ **Error Rate & Stability:** **0.0% Errors** across all configurations under 1000 concurrent I/O connections.
 
 #### Key Architectural Findings (1GB RAM Scaling):
 
-1. **Eliminating JVM GC Breathing Room Constraints:** At 512MB, 1,000 concurrent virtual threads allocating request/response buffers caused frequent G1GC Young Generation pauses. Expanding heap breathing room with 1GB RAM allowed G1GC to keep allocations in Eden space, boosting Spring Boot 4.1 throughput by **+93% (`3,891 -> 7,509 RPS`)** and cutting P95 tail latency in half (**`437.6 -> 226.5 ms`**).
-2. **Closing the Gap with Go:** With 1GB RAM, modern Spring Boot 4.1 running on Java 26 closes nearly **80% of the I/O throughput gap** with Go 1.27 (`7,509 RPS` vs `9,674 RPS`), proving that virtual thread performance in modern JVM is largely bound by GC ergonomics in ultra-small memory envelopes.
-3. **Memory Footprint Equilibrium:** Under 1000 VU load in a 1GB container, Spring Boot 4.1 JVM stabilized at **~541 MB average RAM**, while GraalVM Native averaged **~493 MB** and Go maintained **~58 MB**.
-
+1. **OS-Level GC Breathing Room (Default Heap = 256 MB):** In this scenario OpenJDK's default `MaxRAMPercentage=25` was
+   left in place, meaning the JVM heap was capped at **256 MB** even inside a 1GB container. The throughput gains
+   observed here (`3,891 → 7,509 RPS` for SB 4.1) came from reduced OS-level memory pressure on G1GC's off-heap buffers
+   (GC work queues, code cache, Metaspace, direct buffers) rather than a larger heap. The full heap unlock happens in
+   Scenario 6.
+2. **Closing the Gap with Go:** With 1GB RAM (256MB heap default), modern Spring Boot 4.1 running on Java 26 closes
+   nearly **80% of the I/O throughput gap** with Go 1.27 (`7,509 RPS` vs `9,674 RPS`), proving that virtual thread
+   performance in modern JVM is significantly constrained by available off-heap memory in ultra-small containers.
+3. **Memory Footprint Equilibrium:** Under 1000 VU load in a 1GB container, Spring Boot 4.1 JVM stabilized at **~541 MB
+   average RAM**, while GraalVM Native averaged **~493 MB** and Go maintained **~58 MB**.
+4. **The Missing Piece → Scenario 6:** Despite 1GB total RAM, `MaxRAMPercentage=25` still restricted the JVM heap to 256
+   MB. Explicitly setting `InitialRAMPercentage=75.0` / `MaxRAMPercentage=75.0` (768 MB heap) in Scenario 6 pushed
+   throughput even further to **8,326 RPS** at **181.0 ms P95**.
 
 ---
 
 ### Test Scenario 6: Production JVM Tuning Benchmark (1000 VUs / 30s / I/O-Bound with 1GB RAM & Tuned Heap)
 
 > **Environment:** Docker Containers (`--cpus 2 --memory 1024m`) on Apple Silicon Host.
-> 
-> *Investigating the impact of production-grade container JVM heap and adaptive G1GC flags (`MaxRAMPercentage=75`, `MaxGCPauseMillis=100`, `G1ReservePercent=15`) vs OpenJDK defaults (`MaxRAMPercentage=25`).*
+>
+> *Investigating the impact of production-grade container JVM heap and adaptive G1GC flags (`MaxRAMPercentage=75`,
+`MaxGCPauseMillis=100`, `G1ReservePercent=15`) vs OpenJDK defaults (`MaxRAMPercentage=25`).*
 
 ```text
 ========================================================================================================================================================
@@ -460,23 +477,35 @@ Tuning   : -XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -XX:MaxGCPaus
 ```
 
 > **📌 Standout Metrics & Highlights:**
-> - 🏆 **All-Time Peak Java Throughput (`8,326 RPS`):** Applying safe production-grade heap flags (`InitialRAMPercentage=75.0`, `MaxRAMPercentage=75.0`, `MaxGCPauseMillis=100`) pushed `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` to **`8,326 RPS`** at **`181.0 ms P95`**, closing **85.9% of the total throughput gap with Go (9,698 RPS)**!
-> - ⚡ **Spring Boot 3.5 Major Leap:** Tuned heap sizing propelled `Spring Boot 3.5` to **`7,448 RPS`** with **`259.3 ms P95`** latency under 1,000 concurrent Virtual Threads.
-> - 🚀 **Sub-200ms Tail Latency:** Spring Boot 4.1 broke the 200ms barrier with **`181.0 ms P95`**, matching low-latency requirements for tier-1 microservices.
+> - 🏆 **All-Time Peak Java Throughput (`8,326 RPS`):** Applying safe production-grade heap flags
+    (`InitialRAMPercentage=75.0`, `MaxRAMPercentage=75.0`, `MaxGCPauseMillis=100`) pushed
+    `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` to **`8,326 RPS`** at **`181.0 ms P95`**, closing **85.9%
+    of the total throughput gap with Go (9,698 RPS)**!
+> - ⚡ **Spring Boot 3.5 Major Leap:** Tuned heap sizing propelled `Spring Boot 3.5` to **`7,448 RPS`** with **
+    `259.3 ms P95`** latency under 1,000 concurrent Virtual Threads.
+> - 🚀 **Sub-200ms Tail Latency:** Spring Boot 4.1 broke the 200ms barrier with **`181.0 ms P95`**, matching low-latency
+    requirements for tier-1 microservices.
 > - 🛡️ **Zero Failure SLA:** **0.0% Errors** across all targets under sustained 1,000 concurrent Virtual Threads.
 
 #### Key Architectural Findings (Production JVM Container Tuning):
 
-1. **The `MaxRAMPercentage=25.0` Default Trap:** By default, OpenJDK in containers caps heap (`-Xmx`) at only **25% of container RAM** (256 MB in a 1GB container). Under heavy virtual thread concurrency, 256 MB forces frequent garbage collection. Explicitly setting `-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0` allocates 768 MB directly to the heap, unlocking immediate throughput gains.
-2. **Adaptive G1GC Ergonomics Without Artificial Constraints:** Allowing G1GC to dynamically manage Young Generation sizing while aiming for a realistic `MaxGCPauseMillis=100` pause target prevents Old Gen premature promotion risks while delivering an astonishing **8,326 RPS** and **181.0 ms P95**.
-3. **The Practical Takeaway for Production:** Without writing a single line of application code, applying industry-standard JVM container flags elevates Spring Boot 4.1 Virtual Threads to over **8,300 RPS**, delivering enterprise-grade throughput directly competitive with compiled native binaries.
+1. **The `MaxRAMPercentage=25.0` Default Trap:** By default, OpenJDK in containers caps heap (`-Xmx`) at only **25% of
+   container RAM** (256 MB in a 1GB container). Under heavy virtual thread concurrency, 256 MB forces frequent garbage
+   collection. Explicitly setting `-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0` allocates 768 MB directly to
+   the heap, unlocking immediate throughput gains.
+2. **Adaptive G1GC Ergonomics Without Artificial Constraints:** Allowing G1GC to dynamically manage Young Generation
+   sizing while aiming for a realistic `MaxGCPauseMillis=100` pause target prevents Old Gen premature promotion risks
+   while delivering an astonishing **8,326 RPS** and **181.0 ms P95**.
+3. **The Practical Takeaway for Production:** Without writing a single line of application code, applying
+   industry-standard JVM container flags elevates Spring Boot 4.1 Virtual Threads to over **8,300 RPS**, delivering
+   enterprise-grade throughput directly competitive with compiled native binaries.
 
 ---
 
 ### Comprehensive Architectural Conclusion & Strategic Takeaways
 
-Looking at the full matrix across all test scenarios (I/O Baseline, I/O High-Scale, CPU Baseline, CPU High-Scale, 1GB RAM Scaling, and Production JVM Tuning),
-several overarching architectural and business truths emerge:
+Looking at the full matrix across all test scenarios (I/O Baseline, I/O High-Scale, CPU Baseline, CPU High-Scale, 1GB
+RAM Scaling, and Production JVM Tuning), several overarching architectural and business truths emerge:
 
 ```text
 +-------------------------------+---------------------+---------------------+---------------------+---------------------+------------------------+---------------------+
@@ -486,7 +515,7 @@ several overarching architectural and business truths emerge:
 +-------------------------------+---------------------+---------------------+---------------------+---------------------+------------------------+---------------------+
 | Cold-Start Time               | ~2.1 s (Slowest)    | ~1.3 s              | ~1.4s (CDS: 880ms)  | ~1.4s (AOT: 550ms)  | 65 - 80 ms (Instant)   | ~4 ms (Instant)     |
 | Baseline RAM Footprint        | 240 - 275 MB        | 235 - 319 MB        | 194 - 244 MB        | 209 - 256 MB        | 24 - 150 MB (Lowest)   | 11 - 15 MB          |
-| 1000 VU I/O Capacity          | ~1,937 RPS (523ms)  | ~1,922 RPS (534ms)  | ~1,788 - 7,448 RPS  | ~3,891 - 8,326 RPS  | 6,420 - 6,905 RPS      | ~9,650 - 9,698 RPS  |
+| 1000 VU I/O Capacity          | ~1,937 RPS (523ms)  | ~1,922 RPS (534ms)  | ~1,788 - 7,448 RPS  | ~3,891 - 8,326 RPS  | 6,420 - 6,905 RPS      | ~9,656 - 9,698 RPS  |
 | 1000 VU CPU Computation RPS   | ~862 RPS (2.7s)     | ~1,124 RPS (1.8s)   | ~1,220 RPS (1.1s)   | ~1,299 RPS (108ms)  | ~407 - 412 RPS         | ~1,102 RPS (1.4s)   |
 | Concurrency Model             | 1:1 OS Threads      | 1:1 OS Threads      | Virtual Threads     | Virtual Threads     | Native Virtual Threads | M:N Goroutines      |
 | Object Memory Optimization    | 16B Headers         | 12-16B Headers      | Compact 8B Headers  | Compact 8B Headers  | Substrate Object Model | Flat structs        |
@@ -508,10 +537,12 @@ where:
 
 * **Virtual Threads (Project Loom):** Allow Java applications to effortlessly serve thousands of concurrent I/O
   connections with sub-millisecond thread switching, eliminating the legacy Tomcat 200 platform thread ceiling without
-  having to rewrite code in complex reactive programming models (WebFlux/Reactor). With 1GB RAM and production-tuned heap ergonomics, Spring Boot 4.1 Virtual Threads
-  reached **7,990 RPS** (P95: 211.6ms), closing **84.3% of the performance gap with Go (9,477 RPS)**.
-* **GC Ergonomics & Container Memory Sizing:** Under 512MB RAM, G1GC (`-XX:+UseG1GC`) prevents Serial GC Stop-The-World thrashing.
-  Scaling memory to 1GB provides the necessary Young Generation Eden space for Virtual Threads to scale continuously without GC pauses.
+  having to rewrite code in complex reactive programming models (WebFlux/Reactor). With 1GB RAM and production-tuned
+  heap ergonomics, Spring Boot 4.1 Virtual Threads reached **8,326 RPS** (P95: 181.0ms), closing **85.9% of the
+  performance gap with Go (9,698 RPS)**.
+* **GC Ergonomics & Container Memory Sizing:** Under 512MB RAM, G1GC (`-XX:+UseG1GC`) prevents Serial GC Stop-The-World
+  thrashing. Scaling memory to 1GB provides the necessary Young Generation Eden space for Virtual Threads to scale
+  continuously without GC pauses.
 * **Compact Object Headers (Project Lilliput / JEP 450):** Reduces object header overhead to 8 bytes, delivering **15%
   to 25% heap memory savings (~30MB to 75MB per container)** with a single JVM flag and zero code changes.
 * **HotSpot JIT Raw Compute Superiority:** In CPU-bound algorithmic and cryptographic tasks (SHA-256), modern Java
@@ -540,8 +571,8 @@ thread starvation issues:
     3. Container-optimized Garbage Collection (`-XX:+UseG1GC`)
     4. Right-sized Container Memory (e.g. 1GB RAM for high-traffic services to eliminate minor GC pressure)
 
-  instantly unlocks **3x to 4x higher concurrency (7,500+ RPS), 25% lower memory footprint, and sub-250ms tail latency**—all while
-  preserving your existing Java codebase and ecosystem.
+  instantly unlocks **3x to 4x higher concurrency (7,500+ RPS), 25% lower memory footprint, and sub-250ms tail latency**
+  —all while preserving your existing Java codebase and ecosystem.
 
 #### 4. In-Depth Analysis: GraalVM Native Image vs. Project Leyden / AppCDS & AOT Cache
 
@@ -656,7 +687,8 @@ these essential rules in mind:
     * `Dockerfile.cds` ➔ Dedicated AppCDS container (pre-trained `.jsa` archive with matched runtime flags).
     * `Dockerfile.aot` ➔ Dedicated Spring Boot 4 Ahead-Of-Time + CDS container (`spring-boot:process-aot` baked at build
       time).
-    * `Dockerfile.native` ➔ Dedicated GraalVM CE 25 Native Image container (standalone binary, ~70ms cold start, ~24MB base RAM).
+    * `Dockerfile.native` ➔ Dedicated GraalVM CE 25 Native Image container (standalone binary, ~70ms cold start, ~24MB
+      base RAM).
 * **Parametric Build Arguments (`ARG MAVEN_ARGS` & `ARG TRAINER_JAVA_OPTS`):**
   Each specialized Dockerfile defines overridable `ARG` variables, enabling CI/CD pipelines to easily inject target
   profiles or custom properties without touching repository source files:
@@ -676,13 +708,18 @@ these essential rules in mind:
 
 ##### 7. **Container Memory Ergonomics: The MaxRAMPercentage=25 Default Trap & CDS Compatibility**
 
-* **The Rule:** By default, OpenJDK inside Docker containers (`UseContainerSupport`) caps the heap (`-Xmx`) at only **25% of container RAM**.
-* **The Pitfall:** In a 1GB RAM container, the JVM restricts heap to a mere 256MB. Under 1,000+ concurrent Virtual Threads, this induces unnecessary Young Generation GC pressure and throttles throughput.
+* **The Rule:** By default, OpenJDK inside Docker containers (`UseContainerSupport`) caps the heap (`-Xmx`) at only
+  **25% of container RAM**.
+* **The Pitfall:** In a 1GB RAM container, the JVM restricts heap to a mere 256MB. Under 1,000+ concurrent Virtual
+  Threads, this induces unnecessary Young Generation GC pressure and throttles throughput.
 * **The Best Practice:** In production Kubernetes manifests, explicitly set:
   ```bash
   JAVA_OPTS="-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -XX:MaxGCPauseMillis=100 -XX:G1ReservePercent=15"
   ```
-* **CDS & AOT Compatibility:** Sizing the heap (e.g. from 256MB to 768MB) and expanding G1 Eden space **does NOT invalidate pre-trained AppCDS (`application.jsa`) or Spring AOT archives** (since Compressed OOPs addressing bit-shifts remain identical under 32GB). HotSpot seamlessly maps the CDS archive while unlocking peak ~8,000 RPS throughput.
+* **CDS & AOT Compatibility:** Sizing the heap (e.g. from 256MB to 768MB) and expanding G1 Eden space **does NOT
+  invalidate pre-trained AppCDS (`application.jsa`) or Spring AOT archives** (since Compressed OOPs addressing
+  bit-shifts remain identical under 32GB). HotSpot seamlessly maps the CDS archive while unlocking peak ~8,000 RPS
+  throughput.
 
 ---
 
