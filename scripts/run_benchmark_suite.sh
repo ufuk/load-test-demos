@@ -75,6 +75,7 @@ build_image() {
 echo ""
 echo "[1/3] Building container images..."
 build_image "go-echo-demo" "load-test-go-echo:latest"
+build_image "spring-boot-2-legacy-demo" "load-test-spring-boot-2-legacy:latest"
 build_image "spring-boot-2-demo" "load-test-spring-boot-2:latest"
 build_image "spring-boot-3-demo" "load-test-spring-boot-3:latest"
 build_image "spring-boot-4-demo" "load-test-spring-boot-4:latest"
@@ -83,7 +84,7 @@ build_image "spring-boot-4-demo" "load-test-spring-boot-4:latest"
 # name | image | java_opts
 declare -a configs=()
 
-configs+=("Go 1.27 (Echo v5)|load-test-go-echo:latest|")
+configs+=("Spring Boot 2.0 (Legacy Java 8)|load-test-spring-boot-2-legacy:latest|")
 configs+=("Spring Boot 2.7 (Platform Threads)|load-test-spring-boot-2:latest|")
 
 if [ "$profile" == "all" ] || [ "$profile" == "quick" ]; then
@@ -113,6 +114,8 @@ if [ "$profile" == "all" ] || [ "$profile" == "tuning" ]; then
   configs+=("Spring Boot 4.1 (Virtual + Compact)|load-test-spring-boot-4:latest|-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
   configs+=("Spring Boot 4.1 (Virtual + G1GC + Compact)|load-test-spring-boot-4:latest|-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
 fi
+
+configs+=("Go 1.27 (Echo v5)|load-test-go-echo:latest|")
 
 wait_for_server() {
   local max_attempts=60

@@ -4,6 +4,7 @@ A modern benchmark and load-testing suite comparing runtime memory footprint, st
 different frameworks and JVM configurations:
 
 - [go-echo-demo](go-echo-demo): Go 1.27 with Echo v5
+- [spring-boot-2-legacy-demo](spring-boot-2-legacy-demo): Spring Boot 2.0.x (Java 8)
 - [spring-boot-2-demo](spring-boot-2-demo): Spring Boot 2.7.x (Java 21)
 - [spring-boot-3-demo](spring-boot-3-demo): Spring Boot 3.5.x (Java 25)
 - [spring-boot-4-demo](spring-boot-4-demo): Spring Boot 4.1.x (Java 26)
@@ -104,7 +105,7 @@ Limits   : CPU: 2 cores | RAM: 512m
 ---------------------------------------------------------------------------------------------------------------------------
 | Configuration                                |    Startup |   Min RAM |   Avg RAM |   Max RAM | Sparkline                        |       RPS | P95 Latency |  Errors |
 |:---------------------------------------------|-----------:|----------:|----------:|----------:|:--------------------------------:|----------:|------------:|--------:|
-| Go 1.27 (Echo v5)                            |     4.4 ms |     11 MB |     11 MB |     12 MB | [  ████████████████████████████] |     912/s |    118.2 ms |    0.0% |
+| Spring Boot 2.0 (Legacy Java 8)              |  2120.0 ms |    237 MB |    240 MB |    246 MB | [  ▃█▃▆▆▆▇▃▄▄▃▄▄▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃] |     928/s |    121.6 ms |    0.0% |
 | Spring Boot 2.7 (Platform Threads)           |  1339.0 ms |    223 MB |    235 MB |    238 MB | [ ▄▄▅▄▇▇▇▇▇██▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |     932/s |    118.3 ms |    0.0% |
 | Spring Boot 3.5 (Platform Threads)           |  1494.0 ms |    223 MB |    239 MB |    242 MB | [ ▃▃▂▃▆▆▇▇▇▇███████████████████] |     925/s |    119.8 ms |    0.0% |
 | Spring Boot 3.5 (Virtual Threads)            |  1487.0 ms |    199 MB |    213 MB |    218 MB | [ ▃▅▅▅▆▆▆▆██▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆] |     900/s |    124.0 ms |    0.0% |
@@ -116,22 +117,25 @@ Limits   : CPU: 2 cores | RAM: 512m
 | Spring Boot 4.1 (Virtual + G1GC)             |  1375.0 ms |    234 MB |    260 MB |    264 MB | [ ▄▅▅▆▇▇▇▇▇▇▇█▇█▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |     917/s |    118.4 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + Compact)          |  1446.0 ms |    184 MB |    210 MB |    213 MB | [ ▃▅▅▅▇▇▇▇▇▇▇██████████████████] |     908/s |    119.3 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + G1GC + Compact)   |  1440.0 ms |    238 MB |    256 MB |    262 MB | [ ▃▂▂▄▅▅▅▇▇█▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |     918/s |    117.9 ms |    0.0% |
+| Go 1.27 (Echo v5)                            |     4.4 ms |     11 MB |     11 MB |     12 MB | [  ████████████████████████████] |     912/s |    118.2 ms |    0.0% |
 ===========================================================================================================================
 ```
 
 > **📌 Standout Metrics & Highlights:**
-> - ⚡ **Fastest Cold-Start:** `Go 1.27` (**4.4 ms**) vs JVM (~**1,339 – 1,590 ms**)
+> - ⚡ **Fastest Cold-Start:** `Go 1.27` (**4.4 ms**) vs `Spring Boot 2.0 (Java 8)` (**2,120 ms**) & Modern JVMs (~
+    **1,339 – 1,590 ms**)
 > - 🍃 **Lowest RAM Footprint:** `Go 1.27` (**11 MB**) | `Spring Boot 4.1 (Virtual + Compact)` (**210 MB avg** vs
     Platform 242 MB)
 > - 🚀 **Throughput / Latency:** `Spring Boot 4.1 Platform` (**933 RPS**, **115.3 ms P95**) | `Go 1.27` (**912 RPS**,
     **118.2 ms P95**)
-> - 🛡️ **Error Rate & Reliability:** **0.0% Errors** across all 12 configurations.
+> - 🛡️ **Error Rate & Reliability:** **0.0% Errors** across all 13 configurations.
 
 #### Key Architectural Findings (100 VU I/O):
 
 * **Cold-Start Startup Speed:** Go's statically compiled native binary starts up in **4.4 ms** (~300x faster than JVM
-  cold starts of **1.3s – 1.5s**). *(Note: Upcoming **Project Leyden** and **Spring AOT / GraalVM Native Image**
-  specifically target eliminating this cold-start gap).*
+  cold starts). Notice that **Spring Boot 2.0 on Java 8 takes ~2.1s**, while modern Spring Boot 2.7+ on Java 21+ drops
+  to **~1.3s - 1.5s**. *(Note: Upcoming **Project Leyden** and **Spring AOT / GraalVM Native Image** specifically target
+  eliminating this cold-start gap).*
 * **Memory Footprint & Compact Headers:** Go maintains an astonishingly slim **11 MB RSS**. In Spring Boot 3.5 and 4.1,
   Compact Object Headers (`-XX:+UseCompactObjectHeaders`) reduced average memory from ~242 MB down to **210 MB** (a ~32
   MB / 13% heap reduction).
@@ -153,7 +157,7 @@ Limits   : CPU: 2 cores | RAM: 512m
 ---------------------------------------------------------------------------------------------------------------------------
 | Configuration                                |    Startup |   Min RAM |   Avg RAM |   Max RAM | Sparkline                        |       RPS | P95 Latency |  Errors |
 |:---------------------------------------------|-----------:|----------:|----------:|----------:|:--------------------------------:|----------:|------------:|--------:|
-| Go 1.27 (Echo v5)                            |     3.4 ms |     56 MB |     60 MB |     63 MB | [ ▃▇█▇▇█▇▇██▇▇▇█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄] |    9656/s |    108.0 ms |    0.0% |
+| Spring Boot 2.0 (Legacy Java 8)              |  2130.0 ms |    280 MB |    303 MB |    313 MB | [ ▄▇███▇▇▇▇▇▇▇▇▇▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅] |    1937/s |    523.1 ms |    0.0% |
 | Spring Boot 2.7 (Platform Threads)           |  1367.0 ms |    342 MB |    386 MB |    394 MB | [ ▆▇█▇▇▇▇▇▇▇▇▇▇▇▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆] |    1922/s |    534.6 ms |    0.0% |
 | Spring Boot 3.5 (Platform Threads)           |  1554.0 ms |    349 MB |    363 MB |    370 MB | [ ▆▆▆▆▆▇▇▇▇▇▇▇▇█▅▄▄▄▄▄▄▄▄▄▄▄▄▄▄] |    1931/s |    529.1 ms |    0.0% |
 | Spring Boot 3.5 (Virtual Threads)            |  1419.0 ms |    268 MB |    273 MB |    280 MB | [ ▃▂▂▂▂▂▂▂▂▂▂▂▃▃▃▄▄▅▅▅▅▅▅▅▅▅▅▅█] |      54/s |   2128.1 ms |    0.0% |
@@ -165,6 +169,7 @@ Limits   : CPU: 2 cores | RAM: 512m
 | Spring Boot 4.1 (Virtual + G1GC)             |  1531.0 ms |    287 MB |    333 MB |    344 MB | [ ▄▄▅▅▅▅▆▆▇▇█▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    3347/s |    528.1 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + Compact)          |  1419.0 ms |    266 MB |    301 MB |    310 MB | [ ▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▇▇▇▆▆▆▆▆▆▆▆█] |      91/s |  56956.3 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + G1GC + Compact)   |  1414.0 ms |    276 MB |    326 MB |    335 MB | [ ▆▆▆▇▇▇▇▇▇▇▇█▇▇▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆] |    3811/s |    469.4 ms |    0.0% |
+| Go 1.27 (Echo v5)                            |     3.4 ms |     56 MB |     60 MB |     63 MB | [ ▃▇█▇▇█▇▇██▇▇▇█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄] |    9656/s |    108.0 ms |    0.0% |
 ===========================================================================================================================
 ```
 
@@ -172,8 +177,9 @@ Limits   : CPU: 2 cores | RAM: 512m
 > - 🏆 **Peak Throughput (Overall):** `Go 1.27` (**9,656 RPS**, **108.0 ms P95**)
 > - ⭐ **Top JVM Throughput & Scale:** `Spring Boot 4.1 (Virtual + G1GC + Compact)` with **`3,811 RPS`** & **
     `469.4 ms P95`** (2x higher throughput than Platform Threads!)
-> - ⚠️ **Tomcat 200 Platform Thread Ceiling:** All Platform Thread configurations capped strictly at **`~1,925 RPS`**
-    with P95 latency inflated by 5x to **`~530 ms`** due to thread queue starvation.
+> - ⚠️ **Tomcat 200 Platform Thread Ceiling:** All Platform Thread configurations (including Spring Boot 2.0 Java 8)
+    capped strictly at **`~1,925 – 1,937 RPS`** with P95 latency inflated by 5x to **`~523 – 534 ms`** due to thread
+    queue starvation.
 > - 🚨 **GC Bottleneck in Small Containers:** Virtual Threads with default Serial GC stalled (`16–54 RPS`, multi-second
     STW pauses), proving why **Java 27 makes G1GC universal default**.
 > - 🛡️ **Error Rate & Resilience:** **0.0% Errors** across all targets under 1000 concurrent I/O connections.
@@ -182,9 +188,9 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 1. **Go Goroutines Scalability:** Go saturated the theoretical maximum throughput for 1000 VUs with a 100ms non-blocking
    delay: **9,656 RPS** at **108.0 ms P95 latency** with only **60 MB average RAM**.
-2. **Platform Threads Bottleneck (Tomcat 200 Thread Ceiling):** Spring Boot 2.7, 3.5, and 4.1 with Platform Threads hit
-   the hard 200-thread pool limit. Requests queued up, capping throughput at **~1,925 RPS** and inflating P95 latency by
-   5x up to **~530 ms**.
+2. **Platform Threads Bottleneck (Tomcat 200 Thread Ceiling):** Spring Boot 2.0, 2.7, 3.5, and 4.1 with Platform Threads
+   hit the hard 200-thread pool limit. Requests queued up, capping throughput at **~1,925 RPS** and inflating P95
+   latency by 5x up to **~530 ms**.
 3. **The Virtual Threads & GC Ergonomics Revelation:**
     * When Virtual Threads were enabled in a 512MB RAM container with the **default Serial GC** (Java 26 default on
       small containers), 1000 concurrent threads allocated request scopes faster than single-threaded Serial GC could
@@ -209,7 +215,7 @@ Limits   : CPU: 2 cores | RAM: 512m
 ---------------------------------------------------------------------------------------------------------------------------
 | Configuration                                |    Startup |   Min RAM |   Avg RAM |   Max RAM | Sparkline                        |       RPS | P95 Latency |  Errors |
 |:---------------------------------------------|-----------:|----------:|----------:|----------:|:--------------------------------:|----------:|------------:|--------:|
-| Go 1.27 (Echo v5)                            |     3.8 ms |     13 MB |     15 MB |     16 MB | [ █▅▅▅▅████▅█▅▅█▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅] |    1025/s |    372.3 ms |    0.0% |
+| Spring Boot 2.0 (Legacy Java 8)              |  2057.0 ms |    215 MB |    275 MB |    290 MB | [  ▃▃▄▅▅▆▆██▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |     837/s |    492.5 ms |    0.0% |
 | Spring Boot 2.7 (Platform Threads)           |  1444.0 ms |    282 MB |    319 MB |    328 MB | [ ▃▄▅▅▇▆▆█▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    1097/s |    284.6 ms |    0.0% |
 | Spring Boot 3.5 (Platform Threads)           |  1587.0 ms |    298 MB |    330 MB |    334 MB | [ ▅▅▅▄▆▇▇▇▇▇▇▇█████████████████] |    1113/s |    239.9 ms |    0.0% |
 | Spring Boot 3.5 (Virtual Threads)            |  1536.0 ms |    175 MB |    194 MB |    198 MB | [ ▃▃▃▆▇▆▆▆▇▇▇███▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    1243/s |    116.4 ms |    0.0% |
@@ -221,24 +227,26 @@ Limits   : CPU: 2 cores | RAM: 512m
 | Spring Boot 4.1 (Virtual + G1GC)             |  1471.0 ms |    234 MB |    256 MB |    259 MB | [ ▄▄▄▅▇▇▇▇██████▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    1268/s |    109.8 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + Compact)          |  1584.0 ms |    184 MB |    209 MB |    217 MB | [ ▂▂▃▅▅▄▅▇▇▇▇███▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    1241/s |    113.6 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + G1GC + Compact)   |  1592.0 ms |    234 MB |    256 MB |    259 MB | [ ▄▄▆▇▇▇▇▇██████▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    1267/s |    112.2 ms |    0.0% |
+| Go 1.27 (Echo v5)                            |     3.8 ms |     13 MB |     15 MB |     16 MB | [ █▅▅▅▅████▅█▅▅█▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅] |    1025/s |    372.3 ms |    0.0% |
 ===========================================================================================================================
 ```
 
 > **📌 Standout Metrics & Highlights:**
 > - 🏆 **Highest Raw Compute Throughput:** `Spring Boot 4.1 (Virtual Threads)` (**`1,277 RPS`**, **`112.5 ms P95`**)
-    outperforming `Go 1.27` (**`1,025 RPS`**, **`372.3 ms P95`**)!
-> - ⚡ **Lowest P95 Latency:** `Spring Boot 4.1 (Virtual + G1GC)` (**`109.8 ms`**) vs Platform Threads (**
-    `220–285 ms`**) & Go (**`372.3 ms`**)
+    outperforming both `Go 1.27` (**`1,025 RPS`**, **`372.3 ms P95`**) and `Spring Boot 2.0 Java 8` (**`837 RPS`**, **
+    `492.5 ms P95`**)!
+> - ⚡ **Evolution from Java 8 to Java 26:** Java 26 delivers **+52% higher throughput** and **4.4x lower latency**
+    compared to Java 8 on identical CPU workloads.
 > - 🍃 **Lowest RAM Footprint:** `Go 1.27` (**15 MB**) | `Spring Boot 3.5 Virtual Threads` (**194 MB**) &
     `4.1 Virtual+Compact` (**209 MB**)
-> - 🛡️ **Error Rate & Reliability:** **0.0% Errors** across all 12 configurations.
+> - 🛡️ **Error Rate & Reliability:** **0.0% Errors** across all 13 configurations.
 
 #### Key Architectural Findings (100 VU CPU):
 
-1. **Raw Computation Performance (JVM HotSpot C2 Intrinsics vs Go):** In raw cryptographic loop execution, Spring Boot
-   4.1 with Virtual Threads reached **1,277 RPS** (P95 latency: **112.5 ms**), outperforming Go's **1,025 RPS** (P95
-   latency: **372.3 ms**). HotSpot JIT's aggressive loop unrolling and CPU intrinsic instructions provide superior raw
-   compute throughput once JIT compilation engages.
+1. **Raw Computation Performance (JVM HotSpot C2 Intrinsics vs Go vs Java 8):** In raw cryptographic loop execution,
+   Spring Boot 4.1 with Virtual Threads reached **1,277 RPS** (P95 latency: **112.5 ms**), outperforming Go's **1,025
+   RPS** and Spring Boot 2.0 Java 8's **837 RPS** (P95: **492.5 ms**). Modern HotSpot JIT C2 compiler improvements and
+   vectorized CPU intrinsic instructions provide massive performance leaps over older JVMs.
 2. **Virtual Threads on CPU-Bound Workloads:** Unlike I/O workloads where threads yield during wait states, CPU-bound
    workloads run actively on carrier threads. Under 100 VUs on 2 CPU cores, Virtual Threads achieved **~1,240–1,277
    RPS** with lower P95 latency (**~112 ms**) than Platform Threads (**~220–285 ms**), thanks to lightweight cooperative
@@ -262,7 +270,7 @@ Limits   : CPU: 2 cores | RAM: 512m
 ---------------------------------------------------------------------------------------------------------------------------
 | Configuration                                |    Startup |   Min RAM |   Avg RAM |   Max RAM | Sparkline                        |       RPS | P95 Latency |  Errors |
 |:---------------------------------------------|-----------:|----------:|----------:|----------:|:--------------------------------:|----------:|------------:|--------:|
-| Go 1.27 (Echo v5)                            |     5.5 ms |     38 MB |     50 MB |     57 MB | [ ██████████▆███▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃] |    1102/s |   1485.7 ms |    0.0% |
+| Spring Boot 2.0 (Legacy Java 8)              |  2128.0 ms |    228 MB |    312 MB |    336 MB | [ ▅▅▅▆▆▆▆▇▇▇▇▇█▇▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆] |     862/s |   2695.5 ms |    0.0% |
 | Spring Boot 2.7 (Platform Threads)           |  1351.0 ms |    227 MB |    302 MB |    312 MB | [ ▄▅▆▆▆▇▇▇▇▇▇███▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    1124/s |   1815.1 ms |    0.1% |
 | Spring Boot 3.5 (Platform Threads)           |  1505.0 ms |    232 MB |    320 MB |    342 MB | [ ▃▄▄▅▅▅▅▆▆▆▆▆▆▆█▇▇▇▇▇▇▇▇▇▇▇▇▇▇] |    1099/s |   1815.4 ms |    0.1% |
 | Spring Boot 3.5 (Virtual Threads)            |  1561.0 ms |    207 MB |    229 MB |    239 MB | [ ▄▄▄▅▅▆▆▇▆▆▇▇▇█▆▅▅▅▅▅▅▅▅▅▅▅▅▅▅] |    1220/s |   1160.3 ms |    0.0% |
@@ -274,6 +282,7 @@ Limits   : CPU: 2 cores | RAM: 512m
 | Spring Boot 4.1 (Virtual + G1GC)             |  1500.0 ms |    244 MB |    302 MB |    312 MB | [ ▆▆▇▇▇▇█▇██████▇▆▆▆▆▆▆▆▆▆▆▆▆▆▆] |    1245/s |   1098.6 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + Compact)          |  1520.0 ms |    190 MB |    231 MB |    244 MB | [ ▅▄▅▆▆▆▆▆▆▇▇▇▇█▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆] |    1284/s |   1027.4 ms |    0.0% |
 | Spring Boot 4.1 (Virtual + G1GC + Compact)   |  1493.0 ms |    237 MB |    292 MB |    300 MB | [ ▇▇████████████▇▆▆▆▆▆▆▆▆▆▆▆▆▆▆] |    1249/s |   1019.3 ms |    0.0% |
+| Go 1.27 (Echo v5)                            |     5.5 ms |     38 MB |     50 MB |     57 MB | [ ██████████▆███▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃] |    1102/s |   1485.7 ms |    0.0% |
 ===========================================================================================================================
 ```
 
@@ -281,11 +290,12 @@ Limits   : CPU: 2 cores | RAM: 512m
 > - 🏆 **Peak Throughput Under CPU Starvation:** `Spring Boot 4.1 (Virtual + Compact)` (**`1,284 RPS`**, **
     `1,027.4 ms P95`**)
 > - ⚡ **Virtual Threads vs Platform Preemption:** Virtual Threads achieved **`~1,020 ms P95`** vs Platform Threads **
-    `~1,730 – 1,815 ms P95`** (~750 ms lower tail latency!).
+    `~1,730 – 1,815 ms P95`** and Java 8 **`2,695.5 ms P95`** (~1.6s lower tail latency!).
 > - 🚨 **Error Rate & Connection Failures:**
 >   - `Spring Boot 2.7 (Platform Threads)`: **`0.1% Errors`** (connection timeouts caused by OS thread pool exhaustion)
 >   - `Spring Boot 3.5 (Platform Threads)`: **`0.1% Errors`** (connection timeouts caused by OS thread pool exhaustion)
->   - `Spring Boot 4.1 (Virtual Threads)` & `Go`: **`0.0% Errors` (100% Request Success & SLA Integrity)**!
+>   - `Spring Boot 2.0 (Java 8)`, `Spring Boot 4.1 (Virtual Threads)` & `Go`: **`0.0% Errors` (100% Request Success &
+      SLA Integrity)**!
 > - 🍃 **High-Concurrency Memory Savings:** `Spring Boot 4.1 (Virtual + Compact)` dropped average memory from **
     `305 MB down to 231 MB`** (**~74 MB RAM reduction**).
 
@@ -297,8 +307,8 @@ Limits   : CPU: 2 cores | RAM: 512m
    latency**). Virtual Threads reduce OS-level preemption and kernel thread context-switching overhead even under CPU
    starvation.
 2. **Error Rate & High-Load Reliability:** Heavy OS platform thread contention in Spring Boot 2.7 and 3.5 led to thread
-   starvation and **0.1% request timeouts/connection errors**. In contrast, Virtual Threading and Go achieved **0.0%
-   errors**, ensuring 100% reliability under extreme stress.
+   starvation and **0.1% request timeouts/connection errors**. In contrast, Virtual Threading, Spring Boot 2.0, and Go
+   achieved **0.0% errors**, ensuring 100% reliability under extreme stress.
 3. **Compact Object Headers Impact at 1000 VUs:** In Spring Boot 4.1, Compact Object Headers
    (`-XX:+UseCompactObjectHeaders`) reduced average memory from **305 MB down to 231 MB** (a **~74 MB RAM reduction**
    under heavy concurrency).
@@ -313,18 +323,19 @@ Looking at the full matrix across all 4 test scenarios (I/O Baseline, I/O High-S
 several overarching architectural and business truths emerge:
 
 ```text
-+---------------------------------------------------------------------------------------------------------------+
-|                                    ARCHITECTURAL EVOLUTION SUMMARY                                            |
-+------------------------------+--------------------+--------------------+-------------------+------------------+
-| Paradigm / Capability        | Go 1.27 (Echo v5)  | Spring Boot 2 (J21)| Spring Boot 3.5   | Spring Boot 4.1  |
-+------------------------------+--------------------+--------------------+-------------------+------------------+
-| Cold-Start Time              | ~4 ms (Instant)    | ~1.3 s             | ~1.4 - 1.5 s      | ~1.4 - 1.5 s     |
-| Idle / Baseline RSS Memory   | 11 - 15 MB         | 220 - 280 MB       | 180 - 240 MB      | 180 - 230 MB     |
-| 1000 VU I/O Scale Capacity   | ~9,650 RPS (108ms) | ~1,920 RPS (534ms) | ~1,780 - 3,340 RPS| ~3,810 RPS (469ms)|
-| 1000 VU CPU Computation RPS  | ~1,100 RPS         | ~1,120 RPS         | ~1,220 RPS        | ~1,284 RPS       |
-| Concurrency Model            | M:N Goroutines     | 1:1 OS Threads     | Virtual Threads   | Virtual Threads  |
-| Object Overhead Optimization | Flat structs       | 12-16B Headers     | Compact 8B Headers| Compact 8B Headers|
-+------------------------------+--------------------+--------------------+-------------------+------------------+
++--------------------------------------------------------------------------------------------------------------------------------------+
+|                                                 ARCHITECTURAL EVOLUTION SUMMARY                                                      |
++------------------------------+--------------------+--------------------+--------------------+--------------------+-------------------+
+| Paradigm / Capability        | SB 2.0 (Java 8)    | SB 2.7 (Java 21)   | SB 3.5 (Java 25)   | SB 4.1 (Java 26)   | Go 1.27 (Echo v5) |
++------------------------------+--------------------+--------------------+--------------------+--------------------+-------------------+
+| Cold-Start Time              | ~2.1 s (Slowest)   | ~1.3 s             | ~1.4 - 1.5 s       | ~1.4 - 1.5 s       | ~4 ms (Instant)   |
+| Baseline RAM Footprint       | 240 - 275 MB       | 235 - 319 MB       | 194 - 244 MB       | 209 - 256 MB       | 11 - 15 MB        |
+| 1000 VU I/O Capacity         | ~1,937 RPS (523ms) | ~1,922 RPS (534ms) | ~1,788 - 3,340 RPS | ~3,811 RPS (469ms) | ~9,650 RPS (108ms)|
+| 1000 VU CPU Computation RPS  | ~862 RPS (2.7s)    | ~1,124 RPS (1.8s)  | ~1,220 RPS (1.1s)  | ~1,284 RPS (1.0s)  | ~1,102 RPS (1.4s) |
+| Concurrency Model            | 1:1 OS Threads     | 1:1 OS Threads     | Virtual Threads    | Virtual Threads    | M:N Goroutines    |
+| Object Memory Optimization   | 16B Headers        | 12-16B Headers     | Compact 8B Headers | Compact 8B Headers | Flat structs      |
+| AOT & Native Readiness       | None (Full Dynamic)| None (Full Dynamic)| Spring AOT Previews| Full Spring AOT    | Statically Native |
++------------------------------+--------------------+--------------------+--------------------+--------------------+-------------------+
 ```
 
 #### 1. Why Modern Java & Spring Boot Deserve a Fresh Look
