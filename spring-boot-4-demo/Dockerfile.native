@@ -1,0 +1,31 @@
+# Multi-stage GraalVM Community Edition Native Image Build
+ARG GRAALVM_VERSION=25
+FROM ghcr.io/graalvm/native-image-community:${GRAALVM_VERSION} AS builder
+
+WORKDIR /build
+
+# Copy Maven wrapper & POM
+COPY .mvn .mvn
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:resolve -B || true
+
+# Copy source code
+COPY src src
+
+# Build native binary with target Java version for GraalVM 25 compatibility
+ARG MAVEN_ARGS="-DskipTests -Djava.version=25"
+RUN ./mvnw -Pnative native:compile $MAVEN_ARGS
+
+# Runtime stage: Minimal slim OS container
+FROM debian:bookworm-slim
+WORKDIR /app
+
+# Ensure CA certificates and curl for health check
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /build/target/spring-boot-4-demo server
+
+EXPOSE 8080
+USER 1001
+
+ENTRYPOINT ["/app/server"]

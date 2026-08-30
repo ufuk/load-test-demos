@@ -68,8 +68,10 @@ build_image() {
   local dir=$1
   local tag=$2
   local dockerfile=${3:-Dockerfile}
+  shift 3 2>/dev/null || true
+  local extra_args=("$@")
   echo -n "Building image $tag ($dockerfile)... "
-  docker build -f "$ROOT_DIR/$dir/$dockerfile" -t "$tag" "$ROOT_DIR/$dir" >/dev/null
+  docker build -f "$ROOT_DIR/$dir/$dockerfile" "${extra_args[@]}" -t "$tag" "$ROOT_DIR/$dir" >/dev/null
   echo "DONE"
 }
 
@@ -80,8 +82,12 @@ build_image "spring-boot-2-legacy-demo" "load-test-spring-boot-2-legacy:latest"
 build_image "spring-boot-2-demo" "load-test-spring-boot-2:latest"
 build_image "spring-boot-3-demo" "load-test-spring-boot-3:latest"
 build_image "spring-boot-3-demo" "load-test-spring-boot-3:cds" "Dockerfile.cds"
+build_image "spring-boot-3-demo" "load-test-spring-boot-3:native" "Dockerfile.native"
+build_image "spring-boot-3-demo" "load-test-spring-boot-3:native-virtual" "Dockerfile.native" --build-arg MAVEN_ARGS="-DskipTests -Dspring-boot.aot.jvmArguments=-Dspring.threads.virtual.enabled=true"
 build_image "spring-boot-4-demo" "load-test-spring-boot-4:latest"
 build_image "spring-boot-4-demo" "load-test-spring-boot-4:aot" "Dockerfile.aot"
+build_image "spring-boot-4-demo" "load-test-spring-boot-4:native" "Dockerfile.native"
+build_image "spring-boot-4-demo" "load-test-spring-boot-4:native-virtual" "Dockerfile.native" --build-arg MAVEN_ARGS="-DskipTests -Djava.version=25 -Dspring-boot.aot.jvmArguments=-Dspring.threads.virtual.enabled=true"
 
 # Matrix of benchmark test configurations:
 # name | image | java_opts
@@ -105,6 +111,11 @@ if [ "$profile" == "all" ] || [ "$profile" == "tuning" ]; then
   configs+=("Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)|load-test-spring-boot-3:cds|")
 fi
 
+if [ "$profile" == "all" ] || [ "$profile" == "native" ]; then
+  configs+=("Spring Boot 3.5 (GraalVM Native - Platform Threads)|load-test-spring-boot-3:native|")
+  configs+=("Spring Boot 3.5 (GraalVM Native - Virtual Threads)|load-test-spring-boot-3:native-virtual|")
+fi
+
 if [ "$profile" == "all" ] || [ "$profile" == "quick" ]; then
   configs+=("Spring Boot 4.1 (Platform Threads)|load-test-spring-boot-4:latest|")
 fi
@@ -118,6 +129,11 @@ if [ "$profile" == "all" ] || [ "$profile" == "tuning" ]; then
   configs+=("Spring Boot 4.1 (Virtual + Compact)|load-test-spring-boot-4:latest|-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
   configs+=("Spring Boot 4.1 (Virtual + G1GC + Compact)|load-test-spring-boot-4:latest|-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
   configs+=("Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)|load-test-spring-boot-4:aot|")
+fi
+
+if [ "$profile" == "all" ] || [ "$profile" == "native" ]; then
+  configs+=("Spring Boot 4.1 (GraalVM Native - Platform Threads)|load-test-spring-boot-4:native|")
+  configs+=("Spring Boot 4.1 (GraalVM Native - Virtual Threads)|load-test-spring-boot-4:native-virtual|")
 fi
 
 configs+=("Go 1.27 (Echo v5)|load-test-go-echo:latest|")
