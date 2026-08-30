@@ -67,8 +67,9 @@ echo "==========================================================================
 build_image() {
   local dir=$1
   local tag=$2
-  echo -n "Building image $tag... "
-  docker build -t "$tag" "$ROOT_DIR/$dir" >/dev/null
+  local dockerfile=${3:-Dockerfile}
+  echo -n "Building image $tag ($dockerfile)... "
+  docker build -f "$ROOT_DIR/$dir/$dockerfile" -t "$tag" "$ROOT_DIR/$dir" >/dev/null
   echo "DONE"
 }
 
@@ -78,7 +79,9 @@ build_image "go-echo-demo" "load-test-go-echo:latest"
 build_image "spring-boot-2-legacy-demo" "load-test-spring-boot-2-legacy:latest"
 build_image "spring-boot-2-demo" "load-test-spring-boot-2:latest"
 build_image "spring-boot-3-demo" "load-test-spring-boot-3:latest"
+build_image "spring-boot-3-demo" "load-test-spring-boot-3:cds" "Dockerfile.cds"
 build_image "spring-boot-4-demo" "load-test-spring-boot-4:latest"
+build_image "spring-boot-4-demo" "load-test-spring-boot-4:aot" "Dockerfile.aot"
 
 # Matrix of benchmark test configurations:
 # name | image | java_opts
@@ -99,6 +102,7 @@ if [ "$profile" == "all" ] || [ "$profile" == "tuning" ]; then
   configs+=("Spring Boot 3.5 (Virtual + G1GC)|load-test-spring-boot-3:latest|-XX:+UseG1GC -Dspring.threads.virtual.enabled=true")
   configs+=("Spring Boot 3.5 (Virtual + Compact)|load-test-spring-boot-3:latest|-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
   configs+=("Spring Boot 3.5 (Virtual + G1GC + Compact)|load-test-spring-boot-3:latest|-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
+  configs+=("Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)|load-test-spring-boot-3:cds|")
 fi
 
 if [ "$profile" == "all" ] || [ "$profile" == "quick" ]; then
@@ -113,6 +117,7 @@ if [ "$profile" == "all" ] || [ "$profile" == "tuning" ]; then
   configs+=("Spring Boot 4.1 (Virtual + G1GC)|load-test-spring-boot-4:latest|-XX:+UseG1GC -Dspring.threads.virtual.enabled=true")
   configs+=("Spring Boot 4.1 (Virtual + Compact)|load-test-spring-boot-4:latest|-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
   configs+=("Spring Boot 4.1 (Virtual + G1GC + Compact)|load-test-spring-boot-4:latest|-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true")
+  configs+=("Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)|load-test-spring-boot-4:aot|")
 fi
 
 configs+=("Go 1.27 (Echo v5)|load-test-go-echo:latest|")
@@ -222,19 +227,18 @@ done
 echo ""
 echo "[3/3] Generating Summary Report..."
 echo ""
-echo "==========================================================================================================================="
-echo "                                            BENCHMARK SUITE COMPARISON REPORT                                              "
-echo "==========================================================================================================================="
+echo "======================================================================================================================"
+echo "                                          BENCHMARK SUITE COMPARISON REPORT                                           "
+echo "======================================================================================================================"
 echo "Workload : $vus VUs | Duration: ${duration}s | Test: $test_type ($k6_script)"
 echo "Limits   : CPU: $cpus cores | RAM: $memory"
-echo "---------------------------------------------------------------------------------------------------------------------------"
-printf "| %-44s | %10s | %9s | %9s | %9s | %-12s | %9s | %11s | %7s |\n" \
-  "Configuration" "Startup" "Min RAM" "Avg RAM" "Max RAM" "Sparkline" "RPS" "P95 Latency" "Errors"
-echo "|:---------------------------------------------|-----------:|----------:|----------:|----------:|:------------:|----------:|------------:|--------:|"
+echo "----------------------------------------------------------------------------------------------------------------------"
+printf "| %-55s | %10s | %8s | %8s | %8s | %9s | %11s | %6s |\n" \
+  "Configuration" "Startup" "Min RAM" "Avg RAM" "Max RAM" "RPS" "P95 Latency" "Errors"
+echo "|:--------------------------------------------------------|-----------:|---------:|---------:|---------:|----------:|------------:|-------:|"
 
 for ((i = 0; i < ${#res_names[@]}; i++)); do
-  printf "| %-44s | %10s | %9s | %9s | %9s | %-12s | %9s | %11s | %7s |\n" \
-    "${res_names[$i]}" "${res_startups[$i]}" "${res_min_rams[$i]}" "${res_avg_rams[$i]}" "${res_max_rams[$i]}" \
-    "${res_sparklines[$i]}" "${res_rpss[$i]}" "${res_p95s[$i]}" "${res_errors[$i]}"
+  printf "| %-55s | %10s | %8s | %8s | %8s | %9s | %11s | %6s |\n" \
+    "${res_names[i]}" "${res_startups[i]}" "${res_min_rams[i]}" "${res_avg_rams[i]}" "${res_max_rams[i]}" "${res_rpss[i]}" "${res_p95s[i]}" "${res_errors[i]}"
 done
-echo "==========================================================================================================================="
+echo "======================================================================================================================"
