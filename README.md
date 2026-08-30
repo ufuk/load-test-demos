@@ -128,19 +128,31 @@ Limits   : CPU: 2 cores | RAM: 512m
 ```
 
 > **📌 Standout Metrics & Highlights:**
-> - ⚡ **Fastest Cold-Start:** `Go 1.27` (**4.4 ms**) | `Spring Boot 3.5 & 4.1 GraalVM Native` (**67.0 – 80.0 ms**) vs `Spring Boot 4.1 AOT + CDS` (**605.0 ms**) & Modern standard JVMs (~
+> - ⚡ **Fastest Cold-Start:** `Go 1.27` (**4.4 ms**) | `Spring Boot 3.5 & 4.1 GraalVM Native` (**67.0 – 80.0 ms**) vs
+    `Spring Boot 4.1 AOT + CDS` (**605.0 ms**) & Modern standard JVMs (~
     **1,339 – 1,590 ms**) vs `Spring Boot 2.0 (Java 8)` (**2,120 ms**)
-> - 🍃 **Lowest RAM Footprint:** `Go 1.27` (**11 MB**) | `Spring Boot 3.5 Native Virtual` (**134 MB avg**) & `Spring Boot 4.1 (Virtual + Compact)` (**210 MB avg** vs Platform 242 MB)
-> - 🚀 **Throughput / Latency:** `Spring Boot 4.1 Platform` (**933 RPS**, **115.3 ms P95**) | `Spring Boot 3.5 Native Platform` (**918 RPS**, **117.6 ms P95**) | `Go 1.27` (**912 RPS**, **118.2 ms P95**)
+> - 🍃 **Lowest RAM Footprint:** `Go 1.27` (**11 MB**) | `Spring Boot 3.5 Native Virtual` (**134 MB avg**) &
+    `Spring Boot 4.1 (Virtual + Compact)` (**210 MB avg** vs Platform 242 MB)
+> - 🚀 **Throughput / Latency:** `Spring Boot 4.1 Platform` (**933 RPS**, **115.3 ms P95**) |
+    `Spring Boot 3.5 Native Platform` (**918 RPS**, **117.6 ms P95**) | `Go 1.27` (**912 RPS**, **118.2 ms P95**)
 > - 🛡️ **Error Rate & Reliability:** **0.0% Errors** across all 19 configurations.
 
 #### Key Architectural Findings (100 VU I/O):
 
-* **Cold-Start Startup Speed:** Go's statically compiled native binary starts up in **4.4 ms** (~300x faster than JVM cold starts). Notice that **Spring Boot 2.0 on Java 8 takes ~2.1s**.
-* **GraalVM Native Image Cold-Start Revolution:** GraalVM Native Image boots Spring Boot in **67.0 – 80.0 ms** (over **25x faster than standard JVM** and over **30x faster than Java 8**), eliminating dynamic reflection and bytecode verification entirely.
-* **AppCDS & Spring AOT Startup Acceleration:** AppCDS in Spring Boot 3.5 drops cold startup from ~1,500 ms down to **971.0 ms** (~35% reduction). Adding Spring Boot 4 Ahead-of-Time optimizations with Leyden CDS archive (`Dockerfile.aot`) further slashes startup to **605.0 ms** (a ~60% reduction over standard JIT and ~3.5x faster than Java 8).
-* **Memory Footprint & Compact Headers:** Go maintains an astonishingly slim **11 MB RSS**. In GraalVM Native, average RAM drops to **134 MB**. In standard JVM, Compact Object Headers (`-XX:+UseCompactObjectHeaders`) reduced average memory from ~242 MB down to **210 MB** (a ~32 MB / 13% heap reduction).
-* **Throughput & Error Rate:** At 100 VUs, all targets handled the load with **0.0% errors** and ~900–933 RPS because 100 concurrent requests fits comfortably inside Tomcat's standard 200 platform thread pool limit.
+* **Cold-Start Startup Speed:** Go's statically compiled native binary starts up in **4.4 ms** (~300x faster than JVM
+  cold starts). Notice that **Spring Boot 2.0 on Java 8 takes ~2.1s**.
+* **GraalVM Native Image Cold-Start Revolution:** GraalVM Native Image boots Spring Boot in **67.0 – 80.0 ms** (over
+  **25x faster than standard JVM** and over **30x faster than Java 8**), eliminating dynamic reflection and bytecode
+  verification entirely.
+* **AppCDS & Spring AOT Startup Acceleration:** AppCDS in Spring Boot 3.5 drops cold startup from ~1,500 ms down to
+  **971.0 ms** (~35% reduction). Adding Spring Boot 4 Ahead-of-Time optimizations with Leyden CDS archive
+  (`Dockerfile.aot`) further slashes startup to **605.0 ms** (a ~60% reduction over standard JIT and ~3.5x faster than
+  Java 8).
+* **Memory Footprint & Compact Headers:** Go maintains an astonishingly slim **11 MB RSS**. In GraalVM Native, average
+  RAM drops to **134 MB**. In standard JVM, Compact Object Headers (`-XX:+UseCompactObjectHeaders`) reduced average
+  memory from ~242 MB down to **210 MB** (a ~32 MB / 13% heap reduction).
+* **Throughput & Error Rate:** At 100 VUs, all targets handled the load with **0.0% errors** and ~900–933 RPS because
+  100 concurrent requests fits comfortably inside Tomcat's standard 200 platform thread pool limit.
 
 ---
 
@@ -181,8 +193,12 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 > **📌 Standout Metrics & Highlights:**
 > - 🏆 **Peak Throughput (Overall):** `Go 1.27` (**9,656 RPS**, **108.0 ms P95**)
-> - 🚀 **Top Java/Native Throughput Record:** `Spring Boot 4.1 (GraalVM Native - Virtual Threads)` reached **`6,420 RPS`** & **`222.2 ms P95`** (and `Spring Boot 3.5 Native VT` reached **`5,814 RPS`**, **`240.1 ms P95`**), shattering all previous JVM throughput records and closing over 65% of the throughput gap with Go!
-> - ⭐ **Top Standard JVM JIT Throughput:** `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` with **`3,891 RPS`** & **`437.6 ms P95`** (over **2x higher throughput** than Platform Threads, and **551.0 ms cold start**!)
+> - 🚀 **Top Java/Native Throughput Record:** `Spring Boot 4.1 (GraalVM Native - Virtual Threads)` reached **
+    `6,420 RPS`** & **`222.2 ms P95`** (and `Spring Boot 3.5 Native VT` reached **`5,814 RPS`**, **`240.1 ms P95`**),
+    shattering all previous JVM throughput records and closing over 65% of the throughput gap with Go!
+> - ⭐ **Top Standard JVM JIT Throughput:** `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` with **
+    `3,891 RPS`** & **`437.6 ms P95`** (over **2x higher throughput** than Platform Threads, and **551.0 ms cold
+    start**!)
 > - ⚠️ **Tomcat 200 Platform Thread Ceiling:** All Platform Thread configurations (JVM and Native alike)
     capped strictly at **`~1,896 – 1,937 RPS`** with P95 latency inflated by 5x to **`~523 – 564 ms`** due to thread
     queue starvation.
@@ -194,12 +210,22 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 1. **Go Goroutines Scalability:** Go saturated the theoretical maximum throughput for 1000 VUs with a 100ms non-blocking
    delay: **9,656 RPS** at **108.0 ms P95 latency** with only **60 MB average RAM**.
-2. **GraalVM Native Virtual Threads Powerhouse (`6,420 RPS`):** Spring Boot 4.1 Native with Virtual Threads achieved **6,420 RPS** at **222.2 ms P95 latency** with **75.0 ms startup**. Substrate VM's zero-overhead thread switching and direct machine-code execution allow virtual threads to scale dramatically.
-3. **Platform Threads Bottleneck (Tomcat 200 Thread Ceiling):** Across all versions (Java 8, 21, 25, 26, and Native Image), Platform Threads hit the hard 200-thread pool limit. Requests queued up, capping throughput at **~1,900 – 1,937 RPS** and inflating P95 latency by 5x up to **~530 – 564 ms**.
+2. **GraalVM Native Virtual Threads Powerhouse (`6,420 RPS`):** Spring Boot 4.1 Native with Virtual Threads achieved
+   **6,420 RPS** at **222.2 ms P95 latency** with **75.0 ms startup**. Substrate VM's zero-overhead thread switching and
+   direct machine-code execution allow virtual threads to scale dramatically.
+3. **Platform Threads Bottleneck (Tomcat 200 Thread Ceiling):** Across all versions (Java 8, 21, 25, 26, and Native
+   Image), Platform Threads hit the hard 200-thread pool limit. Requests queued up, capping throughput at **~1,900 –
+   1,937 RPS** and inflating P95 latency by 5x up to **~530 – 564 ms**.
 4. **The Virtual Threads & GC Ergonomics Revelation (Standard JVM):**
-    * When Virtual Threads were enabled in a 512MB RAM container with the **default Serial GC** (Java 26 default on small containers), 1000 concurrent threads allocated request scopes faster than single-threaded Serial GC could collect, causing Stop-The-World GC thrashing.
-    * **With G1GC Enabled (`-XX:+UseG1GC`)**: Spring Boot 4.1 with Virtual Threads + G1GC + Compact Headers jumped to **3,811 RPS** (2x higher throughput than Platform Threads) with improved **469.4 ms P95 latency** and zero errors.
-5. **Peak JVM Concurrency with Spring AOT + CDS (`3,891 RPS`):** The combination of Ahead-of-Time generated bean definitions, pre-computed reflection metadata, AppCDS shared memory mappings, Virtual Threads, and G1GC achieved the single highest standard JVM throughput: **3,891 RPS** at **437.6 ms P95 latency** with **0.0% error rate** and a **551.0 ms cold start**.
+    * When Virtual Threads were enabled in a 512MB RAM container with the **default Serial GC** (Java 26 default on
+      small containers), 1000 concurrent threads allocated request scopes faster than single-threaded Serial GC could
+      collect, causing Stop-The-World GC thrashing.
+    * **With G1GC Enabled (`-XX:+UseG1GC`)**: Spring Boot 4.1 with Virtual Threads + G1GC + Compact Headers jumped to
+      **3,811 RPS** (2x higher throughput than Platform Threads) with improved **469.4 ms P95 latency** and zero errors.
+5. **Peak JVM Concurrency with Spring AOT + CDS (`3,891 RPS`):** The combination of Ahead-of-Time generated bean
+   definitions, pre-computed reflection metadata, AppCDS shared memory mappings, Virtual Threads, and G1GC achieved the
+   single highest standard JVM throughput: **3,891 RPS** at **437.6 ms P95 latency** with **0.0% error rate** and a
+   **551.0 ms cold start**.
 
 ---
 
@@ -239,20 +265,32 @@ Limits   : CPU: 2 cores | RAM: 512m
 ```
 
 > **📌 Standout Metrics & Highlights:**
-> - 🏆 **Highest Raw Compute Throughput:** `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` (**`1,299 RPS`**, **`108.7 ms P95`**)
-    outperforming `Spring Boot 4.1 Virtual Threads` (**`1,277 RPS`**), `Go 1.27` (**`1,025 RPS`**, **`372.3 ms P95`**), `Spring Boot 2.0 Java 8` (**`837 RPS`**, **`492.5 ms P95`**), and `GraalVM Native CE` (**`407 – 412 RPS`**)!
+> - 🏆 **Highest Raw Compute Throughput:** `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` (**`1,299 RPS`**, **
+    `108.7 ms P95`**)
+    outperforming `Spring Boot 4.1 Virtual Threads` (**`1,277 RPS`**), `Go 1.27` (**`1,025 RPS`**, **`372.3 ms P95`**),
+    `Spring Boot 2.0 Java 8` (**`837 RPS`**, **`492.5 ms P95`**), and `GraalVM Native CE` (**`407 – 412 RPS`**)!
 > - ⚡ **Evolution from Java 8 to Java 26:** Java 26 delivers **+55% higher throughput** and **4.5x lower latency**
     compared to Java 8 on identical CPU workloads.
-> - 🍃 **Lowest RAM Footprint:** `Go 1.27` (**15 MB**) | `Spring Boot 3.5 & 4.1 Native Virtual Threads` (**24 – 25 MB avg**) | `Spring Boot 3.5 Virtual Threads` (**194 MB**) & `4.1 Virtual+Compact` (**209 MB**)
+> - 🍃 **Lowest RAM Footprint:** `Go 1.27` (**15 MB**) | `Spring Boot 3.5 & 4.1 Native Virtual Threads` (**24 – 25 MB
+    avg**) | `Spring Boot 3.5 Virtual Threads` (**194 MB**) & `4.1 Virtual+Compact` (**209 MB**)
 > - 🛡️ **Error Rate & Reliability:** **0.0% Errors** across all 19 configurations.
 
 #### Key Architectural Findings (100 VU CPU):
 
-* **AOT + CDS Compute Leadership (`1,299 RPS` vs Go `1,025 RPS`):** Spring Boot 4.1 AOT + CDS reached the highest raw compute throughput of the entire CPU test suite (**1,299 RPS**, **108.7 ms P95**), outperforming Go 1.27 (**1,025 RPS**, **372.3 ms P95**). Because class hierarchies and bean graphs are pre-indexed at build time, the HotSpot C2 JIT compiler can focus CPU cycles immediately on loop unrolling and AVX vector optimizations without background de-optimization.
-* **Java JIT Compiler Optimizations vs Static Native (GraalVM CE):** On computationally intensive loops (iterated cryptographic hashing), the **Java 26 C2 HotSpot compiler significantly outperforms static native compilation** (generating runtime-profiled AVX-512 hardware vector instructions vs GraalVM CE's baseline static assembly).
-* **Native Memory Superiority:** GraalVM Native Image operates at an astonishingly small **24 – 25 MB average RAM** footprint during intensive computation, rivaling Go's 15 MB.
-* **Modern vs Legacy Java:** Spring Boot 4.1 achieved **+55% higher throughput** and **4.5x lower latency** compared to Spring Boot 2.0 running on Java 8 (**837 RPS, 492.5 ms P95**).
-* **Memory Footprint:** Compact Object Headers reduced memory footprint in Spring Boot 3.5 and 4.1 to **~209 MB**, closing the gap with pure native runtimes.
+* **AOT + CDS Compute Leadership (`1,299 RPS` vs Go `1,025 RPS`):** Spring Boot 4.1 AOT + CDS reached the highest raw
+  compute throughput of the entire CPU test suite (**1,299 RPS**, **108.7 ms P95**), outperforming Go 1.27 (**1,025
+  RPS**, **372.3 ms P95**). Because class hierarchies and bean graphs are pre-indexed at build time, the HotSpot C2 JIT
+  compiler can focus CPU cycles immediately on loop unrolling and AVX vector optimizations without background
+  de-optimization.
+* **Java JIT Compiler Optimizations vs Static Native (GraalVM CE):** On computationally intensive loops (iterated
+  cryptographic hashing), the **Java 26 C2 HotSpot compiler significantly outperforms static native compilation**
+  (generating runtime-profiled AVX-512 hardware vector instructions vs GraalVM CE's baseline static assembly).
+* **Native Memory Superiority:** GraalVM Native Image operates at an astonishingly small **24 – 25 MB average RAM**
+  footprint during intensive computation, rivaling Go's 15 MB.
+* **Modern vs Legacy Java:** Spring Boot 4.1 achieved **+55% higher throughput** and **4.5x lower latency** compared to
+  Spring Boot 2.0 running on Java 8 (**837 RPS, 492.5 ms P95**).
+* **Memory Footprint:** Compact Object Headers reduced memory footprint in Spring Boot 3.5 and 4.1 to **~209 MB**,
+  closing the gap with pure native runtimes.
 
 ---
 
@@ -293,16 +331,19 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 > **📌 Standout Metrics & Highlights:**
 > - 🏆 **Peak Throughput Under CPU Starvation:** `Spring Boot 4.1 (Virtual + Compact)` (**`1,284 RPS`**, **
-    `1,027.4 ms P95`**) & `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` (**`1,282 RPS`**, **`1021.0 ms P95`**)
-> - ⚡ **Virtual Threads vs Platform Preemption:** Virtual Threads achieved **`~1,020 ms P95`** (JVM) and **`2,504 – 2,688 ms P95`** (Native) vs Platform Threads **
+    `1,027.4 ms P95`**) & `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` (**`1,282 RPS`**, **
+    `1021.0 ms P95`**)
+> - ⚡ **Virtual Threads vs Platform Preemption:** Virtual Threads achieved **`~1,020 ms P95`** (JVM) and **
+    `2,504 – 2,688 ms P95`** (Native) vs Platform Threads **
     `~1,730 – 1,815 ms P95`** (JVM) and **`~4,000 – 4,295 ms P95`** (Native) and Java 8 **`2,695.5 ms P95`**.
 > - 🚨 **Error Rate & Connection Failures:**
 >   - `Spring Boot 2.7 (Platform Threads)`: **`0.1% Errors`** (connection timeouts caused by OS thread pool exhaustion)
 >   - `Spring Boot 3.5 (Platform Threads)`: **`0.1% Errors`** (connection timeouts caused by OS thread pool exhaustion)
 >   - `Spring Boot 4.1 Native (Platform Threads)`: **`0.2% Errors`** (thread pool exhaustion under extreme starvation)
->   - `Spring Boot 4.1 (Virtual Threads - JVM & Native)` & `Go`: **`0.0% Errors` (100% Request Success &
-      SLA Integrity)**!
-> - 🍃 **High-Concurrency Memory Savings:** `Spring Boot 4.1 Native Virtual` ran at **`46 MB average RAM`** (even lower than Go's **50 MB**).
+>   - `Spring Boot 4.1 (Virtual Threads - JVM & Native)` & `Go`: **`0.0% Errors` (100% Request Success & SLA
+      Integrity)**!
+> - 🍃 **High-Concurrency Memory Savings:** `Spring Boot 4.1 Native Virtual` ran at **`46 MB average RAM`** (even lower
+    than Go's **50 MB**).
 
 #### Key Architectural Findings (1000 VU CPU Scale):
 
@@ -311,13 +352,16 @@ Limits   : CPU: 2 cores | RAM: 512m
    **1,254 – 1,284 RPS** and **~1,020 ms P95 latency**, outperforming Platform Threads (**1,173 RPS**, **1,729.6 ms P95
    latency**). Virtual Threads reduce OS-level preemption and kernel thread context-switching overhead even under CPU
    starvation.
-2. **AOT + CDS Resilience Under Extreme CPU Starvation:** Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact) maintained an
-   outstanding **1,282 RPS** at **1,021.0 ms P95** with **0.0% errors** during severe 1000 VU CPU contention, matching the
-   lowest tail latency among all configurations while booting up in only **563.0 ms**.
-3. **GraalVM Native Virtual Threads Resilience:** Virtual Threads in GraalVM Native cut tail latency in half (**2,504 – 2,688 ms P95**) compared to Native Platform Threads (**3,987 – 4,295 ms P95**), maintaining 0.0% errors and an incredibly low **43 – 46 MB average RAM** footprint.
-4. **Error Rate & High-Load Reliability:** Heavy OS platform thread contention in Spring Boot 2.7, 3.5, and 4.1 Native Platform led to thread
-   starvation and **0.1% – 0.2% request timeouts/connection errors**. In contrast, Virtual Threading (JVM and Native), Spring Boot 2.0, and Go
-   achieved **0.0% errors**, ensuring 100% reliability under extreme stress.
+2. **AOT + CDS Resilience Under Extreme CPU Starvation:** Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)
+   maintained an outstanding **1,282 RPS** at **1,021.0 ms P95** with **0.0% errors** during severe 1000 VU CPU
+   contention, matching the lowest tail latency among all configurations while booting up in only **563.0 ms**.
+3. **GraalVM Native Virtual Threads Resilience:** Virtual Threads in GraalVM Native cut tail latency in half (**2,504 –
+   2,688 ms P95**) compared to Native Platform Threads (**3,987 – 4,295 ms P95**), maintaining 0.0% errors and an
+   incredibly low **43 – 46 MB average RAM** footprint.
+4. **Error Rate & High-Load Reliability:** Heavy OS platform thread contention in Spring Boot 2.7, 3.5, and 4.1 Native
+   Platform led to thread starvation and **0.1% – 0.2% request timeouts/connection errors**. In contrast, Virtual
+   Threading (JVM and Native), Spring Boot 2.0, and Go achieved **0.0% errors**, ensuring 100% reliability under extreme
+   stress.
 5. **Compact Object Headers Impact at 1000 VUs:** In Spring Boot 4.1, Compact Object Headers
    (`-XX:+UseCompactObjectHeaders`) reduced average memory from **305 MB down to 231 MB** (a **~74 MB RAM reduction**
    under heavy concurrency).
@@ -326,21 +370,30 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 ---
 
-
 #### 🧠 JIT vs AOT: The CPU Benchmark Paradox
 
-In Scenario 3 and 4, **GraalVM CE Native Image** (`~412 RPS`) performed significantly worse than **HotSpot C2 JIT** (`~1,299 RPS`) during the computationally intensive (SHA-256) load. This perfectly illustrates the classic compiler architecture trade-offs:
+In Scenario 3 and 4, **GraalVM CE Native Image** (`~412 RPS`) performed significantly worse than **HotSpot C2 JIT**
+(`~1,299 RPS`) during the computationally intensive (SHA-256) load. This perfectly illustrates the classic compiler
+architecture trade-offs:
 
-1. **Dynamic Profiling (JIT) vs Static Compilation (AOT):** 
-   * **HotSpot (JIT):** While the application runs, the JVM profiles the execution path. Upon detecting the "hot" loop (`10,000` hashing iterations), the **C2 Compiler** aggressively optimizes the method, injecting hardware-specific **AVX-512 / ARM Crypto vector instructions**, speculative branch prediction, and loop unrolling.
-   * **GraalVM CE (AOT):** Must compile code *statically* ahead of time without knowing the runtime execution profile, relying on conservative generic assembly instructions.
-2. **Missing Profile-Guided Optimization (PGO):** GraalVM Community Edition lacks **PGO**. (Oracle GraalVM Enterprise uses PGO to feed runtime profiling data back into the AOT compiler, effectively closing this performance gap).
-3. **Garbage Collection Bottleneck:** JVM utilizes parallel worker threads in **G1GC** to clean intermediate byte arrays concurrently. The Native Image Community Edition defaults to a single-threaded **Substrate VM Serial GC** stop-the-world scavenger, bottlenecking heavily across 1000 concurrent threads.
+1. **Dynamic Profiling (JIT) vs Static Compilation (AOT):**
+    * **HotSpot (JIT):** While the application runs, the JVM profiles the execution path. Upon detecting the "hot" loop
+      (`10,000` hashing iterations), the **C2 Compiler** aggressively optimizes the method, injecting hardware-specific
+      **AVX-512 / ARM Crypto vector instructions**, speculative branch prediction, and loop unrolling.
+    * **GraalVM CE (AOT):** Must compile code *statically* ahead of time without knowing the runtime execution profile,
+      relying on conservative generic assembly instructions.
+2. **Missing Profile-Guided Optimization (PGO):** GraalVM Community Edition lacks **PGO**. (Oracle GraalVM Enterprise
+   uses PGO to feed runtime profiling data back into the AOT compiler, effectively closing this performance gap).
+3. **Garbage Collection Bottleneck:** JVM utilizes parallel worker threads in **G1GC** to clean intermediate byte arrays
+   concurrently. The Native Image Community Edition defaults to a single-threaded **Substrate VM Serial GC**
+   stop-the-world scavenger, bottlenecking heavily across 1000 concurrent threads.
 
-**Conclusion:** 
-* Choose **GraalVM Native Image** for microservices, Serverless, auto-scaling clusters, and **I/O-heavy workloads** (where it broke records at 6,420 RPS). 
-* Choose **HotSpot C2 JIT (with CDS)** for long-running processes, **Big Data, Machine Learning, and heavy cryptographic computation**.
+**Conclusion:**
 
+* Choose **GraalVM Native Image** for microservices, Serverless, auto-scaling clusters, and **I/O-heavy workloads**
+  (where it broke records at 6,420 RPS).
+* Choose **HotSpot C2 JIT (with CDS)** for long-running processes, **Big Data, Machine Learning, and heavy cryptographic
+  computation**.
 
 ---
 
@@ -412,7 +465,8 @@ thread starvation issues:
 
 #### 4. 🔬 In-Depth Analysis: GraalVM Native Image vs. Project Leyden / AppCDS & AOT Cache
 
-Modern cloud-native Java offers two primary Ahead-Of-Time (AOT) acceleration paths. Choosing the right one requires understanding their distinct architectural trade-offs:
+Modern cloud-native Java offers two primary Ahead-Of-Time (AOT) acceleration paths. Choosing the right one requires
+understanding their distinct architectural trade-offs:
 
 ```text
 +---------------------------------------------------------------------------------------------------------------+
@@ -438,33 +492,42 @@ Modern cloud-native Java offers two primary Ahead-Of-Time (AOT) acceleration pat
 The mechanics of CDS and AOT caching differ significantly between Spring Boot generations:
 
 ##### **Spring Boot 3.3+ / 3.5+ (Java 21/25): Classic AppCDS & AOT Cache**
-* **Mechanism:** Relies on HotSpot **AppCDS (Application Class Data Sharing)** combined with Spring AOT (`spring-boot:process-aot`).
+
+* **Mechanism:** Relies on HotSpot **AppCDS (Application Class Data Sharing)** combined with Spring AOT
+  (`spring-boot:process-aot`).
 * **Workflow:**
-  1. **Extraction:** `java -Djarmode=tools -jar app.jar extract --destination extracted/`
-  2. **Training Run:** `java -XX:ArchiveClassesAtExit=app.jsa -Dspring.context.exit=onRefresh -jar extracted/app.jar`
-  3. **Production Startup:** `java -XX:SharedArchiveFile=app.jsa -jar extracted/app.jar`
-* **Characteristics:** Dumps class metadata into `.jsa` at context refresh exit, cutting Spring Boot startup time from ~1.5s down to ~450ms.
+    1. **Extraction:** `java -Djarmode=tools -jar app.jar extract --destination extracted/`
+    2. **Training Run:** `java -XX:ArchiveClassesAtExit=app.jsa -Dspring.context.exit=onRefresh -jar extracted/app.jar`
+    3. **Production Startup:** `java -XX:SharedArchiveFile=app.jsa -jar extracted/app.jar`
+* **Characteristics:** Dumps class metadata into `.jsa` at context refresh exit, cutting Spring Boot startup time from ~
+  1.5s down to ~450ms.
 
 ##### **Spring Boot 4.1+ (Java 26+ / Project Leyden JEP 483): Next-Gen AOT Cache**
-* **Mechanism:** Integrates natively with **Project Leyden JEP 483 (Ahead-of-Time Class Loading & Linking)** and unified AOT Cache.
+
+* **Mechanism:** Integrates natively with **Project Leyden JEP 483 (Ahead-of-Time Class Loading & Linking)** and unified
+  AOT Cache.
 * **Workflow:**
-  1. **Record Phase:** `java -XX:AOTMode=record -XX:AOTConfiguration=app.aotconf -jar app.jar`
-  2. **Create Phase:** `java -XX:AOTMode=create -XX:AOTConfiguration=app.aotconf -XX:AOTCache=app.aot -jar app.jar`
-  3. **Production Startup:** `java -XX:AOTMode=on -XX:AOTCache=app.aot -jar app.jar`
+    1. **Record Phase:** `java -XX:AOTMode=record -XX:AOTConfiguration=app.aotconf -jar app.jar`
+    2. **Create Phase:** `java -XX:AOTMode=create -XX:AOTConfiguration=app.aotconf -XX:AOTCache=app.aot -jar app.jar`
+    3. **Production Startup:** `java -XX:AOTMode=on -XX:AOTCache=app.aot -jar app.jar`
 * **Key Enhancements in Spring Boot 4:**
-  * Classes are not just loaded from archive; they are **pre-linked, pre-verified, and pre-initialized** where safe.
-  * Eliminates dynamic class verification and symbol resolution CPU spikes during container cold boots.
-  * Fully unified with Spring Boot 4's modular WebMVC architecture and Zero-Reflection bean factories.
+    * Classes are not just loaded from archive; they are **pre-linked, pre-verified, and pre-initialized** where safe.
+    * Eliminates dynamic class verification and symbol resolution CPU spikes during container cold boots.
+    * Fully unified with Spring Boot 4's modular WebMVC architecture and Zero-Reflection bean factories.
 
 ---
 
 #### 6. ⚠️ Critical Production Gotchas & Best Practices
 
-When deploying Spring AOT, AppCDS / Project Leyden, or GraalVM Native Images in production Kubernetes clusters, keep these essential rules in mind:
+When deploying Spring AOT, AppCDS / Project Leyden, or GraalVM Native Images in production Kubernetes clusters, keep
+these essential rules in mind:
 
 ##### 1. **JVM Flag Strictness & Hardware Layout Alignment (CDS / Leyden)**
-* **The Rule:** The shared archive (`application.jsa` / `app.aot`) is strictly tied to the memory layout, garbage collector, and heap ergonomics used at training time.
-* **The Pitfall:** If you create a CDS archive with default flags and then attempt to run it with Compact Object Headers or G1GC:
+
+* **The Rule:** The shared archive (`application.jsa` / `app.aot`) is strictly tied to the memory layout, garbage
+  collector, and heap ergonomics used at training time.
+* **The Pitfall:** If you create a CDS archive with default flags and then attempt to run it with Compact Object Headers
+  or G1GC:
   ```text
   [warning][cds] The shared archive file was created with UseCompactObjectHeaders = 0
   [warning][cds] Unable to use shared archive file.
@@ -478,8 +541,12 @@ When deploying Spring AOT, AppCDS / Project Leyden, or GraalVM Native Images in 
   ```
 
 ##### 2. **Spring Profile Freezing & Conditional Beans in Spring AOT**
-* **The Rule:** Spring AOT (`spring-boot:process-aot`) evaluates `@Profile("prod")`, `@ConditionalOnProperty`, and bean registration **at build-time**, generating static Java initializer code.
-* **The Pitfall:** If you build the AOT artifact without specifying a profile, Spring generates initializers for the default profile. If you later try to start the container with `-Dspring.profiles.active=prod`, any beans conditional on the `prod` profile that were excluded during AOT generation will fail with `NoSuchBeanDefinitionException`.
+
+* **The Rule:** Spring AOT (`spring-boot:process-aot`) evaluates `@Profile("prod")`, `@ConditionalOnProperty`, and bean
+  registration **at build-time**, generating static Java initializer code.
+* **The Pitfall:** If you build the AOT artifact without specifying a profile, Spring generates initializers for the
+  default profile. If you later try to start the container with `-Dspring.profiles.active=prod`, any beans conditional
+  on the `prod` profile that were excluded during AOT generation will fail with `NoSuchBeanDefinitionException`.
 * **Best Practice:** When using Spring AOT in multi-environment setups, compile/train for the specific target profile:
   ```bash
   # During build / training:
@@ -489,19 +556,29 @@ When deploying Spring AOT, AppCDS / Project Leyden, or GraalVM Native Images in 
   Or maintain profile-specific Docker image tags (e.g., `my-service:prod-aot`).
 
 ##### 3. **The Throughput vs Startup Trade-off**
-* **Choose GraalVM Native Image for:** Scale-to-zero serverless functions (AWS Lambda, Knative, Google Cloud Run), batch CLI tools, and edge devices where sub-50ms startup is paramount.
-* **Choose Project Leyden / CDS for:** Long-running microservices, high-traffic APIs, and enterprise backends where **peak HotSpot C2 JIT throughput, runtime adaptive profiling, and 100% APM/JFR observability** are required.
+
+* **Choose GraalVM Native Image for:** Scale-to-zero serverless functions (AWS Lambda, Knative, Google Cloud Run), batch
+  CLI tools, and edge devices where sub-50ms startup is paramount.
+* **Choose Project Leyden / CDS for:** Long-running microservices, high-traffic APIs, and enterprise backends where
+  **peak HotSpot C2 JIT throughput, runtime adaptive profiling, and 100% APM/JFR observability** are required.
 
 ##### 4. **Multi-Tenant Host Memory Savings with AppCDS**
-* On Linux Kubernetes nodes running dozens of container replicas, the OS kernel memory-maps the read-only `.jsa` class archive file into physical RAM once and shares those memory pages across all container instances on that node, dramatically lowering overall cluster memory pressure.
+
+* On Linux Kubernetes nodes running dozens of container replicas, the OS kernel memory-maps the read-only `.jsa` class
+  archive file into physical RAM once and shares those memory pages across all container instances on that node,
+  dramatically lowering overall cluster memory pressure.
 
 ##### 5. **Dedicated Multi-Target Dockerfiles (`Dockerfile`, `Dockerfile.cds`, `Dockerfile.aot`)**
-* To keep the root `pom.xml` and `application.yaml` files 100% clean and free of build-time workarounds, dedicated Dockerfiles are maintained for each deployment target:
-  * `Dockerfile` ➔ Standard JIT container (dynamic reflection, clean developer build).
-  * `Dockerfile.cds` ➔ Dedicated AppCDS container (pre-trained `.jsa` archive with matched runtime flags).
-  * `Dockerfile.aot` ➔ Dedicated Spring Boot 4 Ahead-Of-Time + CDS container (`spring-boot:process-aot` baked at build time).
+
+* To keep the root `pom.xml` and `application.yaml` files 100% clean and free of build-time workarounds, dedicated
+  Dockerfiles are maintained for each deployment target:
+    * `Dockerfile` ➔ Standard JIT container (dynamic reflection, clean developer build).
+    * `Dockerfile.cds` ➔ Dedicated AppCDS container (pre-trained `.jsa` archive with matched runtime flags).
+    * `Dockerfile.aot` ➔ Dedicated Spring Boot 4 Ahead-Of-Time + CDS container (`spring-boot:process-aot` baked at build
+      time).
 * **Parametric Build Arguments (`ARG MAVEN_ARGS` & `ARG TRAINER_JAVA_OPTS`):**
-  Each specialized Dockerfile defines overridable `ARG` variables, enabling CI/CD pipelines to easily inject target profiles or custom properties without touching repository source files:
+  Each specialized Dockerfile defines overridable `ARG` variables, enabling CI/CD pipelines to easily inject target
+  profiles or custom properties without touching repository source files:
   ```bash
   # Example: Custom profile AOT compilation
   docker build -f spring-boot-4-demo/Dockerfile.aot \
@@ -511,8 +588,10 @@ When deploying Spring AOT, AppCDS / Project Leyden, or GraalVM Native Images in 
   ```
 
 ##### 6. **CI/CD Pipeline Impact**
+
 * GraalVM native image compilation can add 3–8 minutes to every build and requires builder nodes with 6GB+ RAM.
-* Leyden / CDS training adds less than 10 seconds to standard Docker builds, making it seamless for rapid deployment pipelines.
+* Leyden / CDS training adds less than 10 seconds to standard Docker builds, making it seamless for rapid deployment
+  pipelines.
 
 ---
 
@@ -550,15 +629,18 @@ comparison table:
 7. **Spring Boot 3.5 (Virtual + G1GC + Compact)**: Virtual Threads + G1GC + Compact Object Headers.
 8. **Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)**: AppCDS Pre-Trained Image (`load-test-spring-boot-3:cds`).
 9. **Spring Boot 3.5 (GraalVM Native - Platform Threads)**: GraalVM CE Native Image (`load-test-spring-boot-3:native`).
-10. **Spring Boot 3.5 (GraalVM Native - Virtual Threads)**: GraalVM CE Native Image (`load-test-spring-boot-3:native-virtual`).
+10. **Spring Boot 3.5 (GraalVM Native - Virtual Threads)**: GraalVM CE Native Image
+    (`load-test-spring-boot-3:native-virtual`).
 11. **Spring Boot 4.1 (Platform Threads)**: Spring Boot 4.1 Tomcat platform threads.
 12. **Spring Boot 4.1 (Virtual Threads)**: Lightweight virtual threads.
 13. **Spring Boot 4.1 (Virtual + G1GC)**: Virtual Threads + G1GC (`-XX:+UseG1GC`).
 14. **Spring Boot 4.1 (Virtual + Compact)**: Virtual Threads + Compact Object Headers (`-XX:+UseCompactObjectHeaders`).
 15. **Spring Boot 4.1 (Virtual + G1GC + Compact)**: Virtual Threads + G1GC + Compact Object Headers.
-16. **Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)**: Ahead-of-Time + CDS Pre-Trained Image (`load-test-spring-boot-4:aot`).
+16. **Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)**: Ahead-of-Time + CDS Pre-Trained Image
+    (`load-test-spring-boot-4:aot`).
 17. **Spring Boot 4.1 (GraalVM Native - Platform Threads)**: GraalVM CE Native Image (`load-test-spring-boot-4:native`).
-18. **Spring Boot 4.1 (GraalVM Native - Virtual Threads)**: GraalVM CE Native Image (`load-test-spring-boot-4:native-virtual`).
+18. **Spring Boot 4.1 (GraalVM Native - Virtual Threads)**: GraalVM CE Native Image
+    (`load-test-spring-boot-4:native-virtual`).
 19. **Go 1.27 (Echo v5)**: Native Goroutines baseline (statically compiled binary).
 
 #### Example Summary Report Output:
