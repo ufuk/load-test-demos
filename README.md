@@ -96,38 +96,30 @@ All projects implement a standardized `BenchmarkController`:
 
 ### Test Scenario 1: Baseline Concurrency (100 VUs / 30s / I/O-Bound with 100ms delay)
 
-> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host.
+> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host  
+> **Workload:** 100 VUs | **Duration:** 30s | **Test:** `io` (100ms non-blocking delay)
 
-```text
-============================================================================================================================================
-|                                                    BENCHMARK SUITE COMPARISON REPORT                                                     |
-============================================================================================================================================
-Workload : 100 VUs | Duration: 30s | Test: io (k6/io_bound_test.js)
-Limits   : CPU: 2 cores | RAM: 512m
---------------------------------------------------------------------------------------------------------------------------------------------
-| Configuration                                           |    Startup |  Min RAM |  Avg RAM |  Max RAM |       RPS | P95 Latency | Errors |
-|:--------------------------------------------------------|-----------:|---------:|---------:|---------:|----------:|------------:|-------:|
-| Spring Boot 2.0 (Legacy Java 8)                         |  2120.0 ms |   237 MB |   240 MB |   246 MB |     928/s |    121.6 ms |   0.0% |
-| Spring Boot 2.7 (Platform Threads)                      |  1339.0 ms |   223 MB |   235 MB |   238 MB |     932/s |    118.3 ms |   0.0% |
-| Spring Boot 3.5 (Platform Threads)                      |  1494.0 ms |   223 MB |   239 MB |   242 MB |     925/s |    119.8 ms |   0.0% |
-| Spring Boot 3.5 (Virtual Threads)                       |  1487.0 ms |   199 MB |   213 MB |   218 MB |     900/s |    124.0 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC)                        |  1457.0 ms |   227 MB |   231 MB |   233 MB |     909/s |    121.1 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + Compact)                     |  1428.0 ms |   192 MB |   210 MB |   215 MB |     865/s |    127.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC + Compact)              |  1433.0 ms |   226 MB |   244 MB |   248 MB |     871/s |    127.3 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)        |   971.0 ms |   322 MB |   335 MB |   338 MB |     915/s |    119.3 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Platform Threads)     |    80.0 ms |   143 MB |   148 MB |   160 MB |     918/s |    117.6 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Virtual Threads)      |    67.0 ms |   128 MB |   134 MB |   153 MB |     877/s |    127.2 ms |   0.0% |
-| Spring Boot 4.1 (Platform Threads)                      |  1590.0 ms |   215 MB |   242 MB |   246 MB |     933/s |    115.3 ms |   0.0% |
-| Spring Boot 4.1 (Virtual Threads)                       |  1422.0 ms |   185 MB |   215 MB |   221 MB |     910/s |    120.0 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC)                        |  1375.0 ms |   234 MB |   260 MB |   264 MB |     917/s |    118.4 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + Compact)                     |  1446.0 ms |   184 MB |   210 MB |   213 MB |     908/s |    119.3 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC + Compact)              |  1440.0 ms |   238 MB |   256 MB |   262 MB |     918/s |    117.9 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)  |   605.0 ms |   322 MB |   349 MB |   353 MB |     916/s |    118.4 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Platform Threads)     |    76.0 ms |   157 MB |   160 MB |   170 MB |     911/s |    119.8 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Virtual Threads)      |    73.0 ms |   147 MB |   151 MB |   166 MB |     875/s |    124.5 ms |   0.0% |
-| Go 1.27 (Echo v5)                                       |     4.4 ms |    11 MB |    11 MB |    12 MB |     912/s |    118.2 ms |   0.0% |
-============================================================================================================================================
-```
+| Configuration                                          |   Startup | Min RAM | Avg RAM | Max RAM |   RPS | P95 Latency | Errors |
+|:-------------------------------------------------------|----------:|--------:|--------:|--------:|------:|------------:|-------:|
+| Spring Boot 2.0 (Legacy Java 8)                        | 2120.0 ms |  237 MB |  240 MB |  246 MB | 928/s |    121.6 ms |   0.0% |
+| Spring Boot 2.7 (Platform Threads)                     | 1339.0 ms |  223 MB |  235 MB |  238 MB | 932/s |    118.3 ms |   0.0% |
+| Spring Boot 3.5 (Platform Threads)                     | 1494.0 ms |  223 MB |  239 MB |  242 MB | 925/s |    119.8 ms |   0.0% |
+| Spring Boot 3.5 (Virtual Threads)                      | 1487.0 ms |  199 MB |  213 MB |  218 MB | 900/s |    124.0 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC)                       | 1457.0 ms |  227 MB |  231 MB |  233 MB | 909/s |    121.1 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + Compact)                    | 1428.0 ms |  192 MB |  210 MB |  215 MB | 865/s |    127.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC + Compact)             | 1433.0 ms |  226 MB |  244 MB |  248 MB | 871/s |    127.3 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)       |  971.0 ms |  322 MB |  335 MB |  338 MB | 915/s |    119.3 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Platform Threads)    |   80.0 ms |  143 MB |  148 MB |  160 MB | 918/s |    117.6 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Virtual Threads)     |   67.0 ms |  128 MB |  134 MB |  153 MB | 877/s |    127.2 ms |   0.0% |
+| Spring Boot 4.1 (Platform Threads)                     | 1590.0 ms |  215 MB |  242 MB |  246 MB | 933/s |    115.3 ms |   0.0% |
+| Spring Boot 4.1 (Virtual Threads)                      | 1422.0 ms |  185 MB |  215 MB |  221 MB | 910/s |    120.0 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC)                       | 1375.0 ms |  234 MB |  260 MB |  264 MB | 917/s |    118.4 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + Compact)                    | 1446.0 ms |  184 MB |  210 MB |  213 MB | 908/s |    119.3 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC + Compact)             | 1440.0 ms |  238 MB |  256 MB |  262 MB | 918/s |    117.9 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact) |  605.0 ms |  322 MB |  349 MB |  353 MB | 916/s |    118.4 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Platform Threads)    |   76.0 ms |  157 MB |  160 MB |  170 MB | 911/s |    119.8 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Virtual Threads)     |   73.0 ms |  147 MB |  151 MB |  166 MB | 875/s |    124.5 ms |   0.0% |
+| Go 1.27 (Echo v5)                                      |    4.4 ms |   11 MB |   11 MB |   12 MB | 912/s |    118.2 ms |   0.0% |
 
 > **📌 Standout Metrics & Highlights:**
 > - ⚡ **Fastest Cold-Start:** `Go 1.27` (**4.4 ms**) | `Spring Boot 3.5 & 4.1 GraalVM Native` (**67.0 – 80.0 ms**) vs
@@ -160,38 +152,30 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 ### Test Scenario 2: High Concurrency Scale Test (1000 VUs / 30s / I/O-Bound with 100ms delay)
 
-> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host.
+> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host  
+> **Workload:** 1000 VUs | **Duration:** 30s | **Test:** `io` (100ms non-blocking delay)
 
-```text
-============================================================================================================================================
-|                                                    BENCHMARK SUITE COMPARISON REPORT                                                     |
-============================================================================================================================================
-Workload : 1000 VUs | Duration: 30s | Test: io (k6/io_bound_test.js)
-Limits   : CPU: 2 cores | RAM: 512m
---------------------------------------------------------------------------------------------------------------------------------------------
-| Configuration                                           |    Startup |  Min RAM |  Avg RAM |  Max RAM |       RPS | P95 Latency | Errors |
-|:--------------------------------------------------------|-----------:|---------:|---------:|---------:|----------:|------------:|-------:|
-| Spring Boot 2.0 (Legacy Java 8)                         |  2130.0 ms |   280 MB |   303 MB |   313 MB |    1937/s |    523.1 ms |   0.0% |
-| Spring Boot 2.7 (Platform Threads)                      |  1367.0 ms |   342 MB |   386 MB |   394 MB |    1922/s |    534.6 ms |   0.0% |
-| Spring Boot 3.5 (Platform Threads)                      |  1554.0 ms |   349 MB |   363 MB |   370 MB |    1931/s |    529.1 ms |   0.0% |
-| Spring Boot 3.5 (Virtual Threads)                       |  1419.0 ms |   268 MB |   273 MB |   280 MB |      54/s |   2128.1 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC)                        |  1481.0 ms |   296 MB |   316 MB |   326 MB |    1773/s |    921.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + Compact)                     |  1471.0 ms |   280 MB |   281 MB |   285 MB |      16/s |    952.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC + Compact)              |  1440.0 ms |   295 MB |   320 MB |   331 MB |    1788/s |    841.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)        |   882.0 ms |   293 MB |   315 MB |   322 MB |    2227/s |    786.2 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Platform Threads)     |    70.0 ms |   115 MB |   128 MB |   160 MB |    1923/s |    554.5 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Virtual Threads)      |    71.0 ms |   220 MB |   257 MB |   391 MB |    5814/s |    240.1 ms |   0.0% |
-| Spring Boot 4.1 (Platform Threads)                      |  1502.0 ms |   351 MB |   381 MB |   390 MB |    1926/s |    531.9 ms |   0.0% |
-| Spring Boot 4.1 (Virtual Threads)                       |  1482.0 ms |   265 MB |   282 MB |   290 MB |      34/s |    974.1 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC)                        |  1531.0 ms |   287 MB |   333 MB |   344 MB |    3347/s |    528.1 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + Compact)                     |  1419.0 ms |   266 MB |   301 MB |   310 MB |      91/s |  56956.3 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC + Compact)              |  1414.0 ms |   276 MB |   326 MB |   335 MB |    3811/s |    469.4 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)  |   551.0 ms |   265 MB |   314 MB |   324 MB |    3891/s |    437.6 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Platform Threads)     |    68.0 ms |   109 MB |   119 MB |   147 MB |    1896/s |    564.4 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Virtual Threads)      |    75.0 ms |   150 MB |   292 MB |   416 MB |    6420/s |    222.2 ms |   0.0% |
-| Go 1.27 (Echo v5)                                       |     3.4 ms |    56 MB |    60 MB |    63 MB |    9656/s |    108.0 ms |   0.0% |
-============================================================================================================================================
-```
+| Configuration                                          |   Startup | Min RAM | Avg RAM | Max RAM |    RPS | P95 Latency | Errors |
+|:-------------------------------------------------------|----------:|--------:|--------:|--------:|-------:|------------:|-------:|
+| Spring Boot 2.0 (Legacy Java 8)                        | 2130.0 ms |  280 MB |  303 MB |  313 MB | 1937/s |    523.1 ms |   0.0% |
+| Spring Boot 2.7 (Platform Threads)                     | 1367.0 ms |  342 MB |  386 MB |  394 MB | 1922/s |    534.6 ms |   0.0% |
+| Spring Boot 3.5 (Platform Threads)                     | 1554.0 ms |  349 MB |  363 MB |  370 MB | 1931/s |    529.1 ms |   0.0% |
+| Spring Boot 3.5 (Virtual Threads)                      | 1419.0 ms |  268 MB |  273 MB |  280 MB |   54/s |   2128.1 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC)                       | 1481.0 ms |  296 MB |  316 MB |  326 MB | 1773/s |    921.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + Compact)                    | 1471.0 ms |  280 MB |  281 MB |  285 MB |   16/s |    952.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC + Compact)             | 1440.0 ms |  295 MB |  320 MB |  331 MB | 1788/s |    841.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)       |  882.0 ms |  293 MB |  315 MB |  322 MB | 2227/s |    786.2 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Platform Threads)    |   70.0 ms |  115 MB |  128 MB |  160 MB | 1923/s |    554.5 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Virtual Threads)     |   71.0 ms |  220 MB |  257 MB |  391 MB | 5814/s |    240.1 ms |   0.0% |
+| Spring Boot 4.1 (Platform Threads)                     | 1502.0 ms |  351 MB |  381 MB |  390 MB | 1926/s |    531.9 ms |   0.0% |
+| Spring Boot 4.1 (Virtual Threads)                      | 1482.0 ms |  265 MB |  282 MB |  290 MB |   34/s |    974.1 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC)                       | 1531.0 ms |  287 MB |  333 MB |  344 MB | 3347/s |    528.1 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + Compact)                    | 1419.0 ms |  266 MB |  301 MB |  310 MB |   91/s |  56956.3 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC + Compact)             | 1414.0 ms |  276 MB |  326 MB |  335 MB | 3811/s |    469.4 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact) |  551.0 ms |  265 MB |  314 MB |  324 MB | 3891/s |    437.6 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Platform Threads)    |   68.0 ms |  109 MB |  119 MB |  147 MB | 1896/s |    564.4 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Virtual Threads)     |   75.0 ms |  150 MB |  292 MB |  416 MB | 6420/s |    222.2 ms |   0.0% |
+| Go 1.27 (Echo v5)                                      |    3.4 ms |   56 MB |   60 MB |   63 MB | 9656/s |    108.0 ms |   0.0% |
 
 > **📌 Standout Metrics & Highlights:**
 > - 🏆 **Peak Throughput (Overall):** `Go 1.27` (**9,656 RPS**, **108.0 ms P95**)
@@ -233,38 +217,30 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 ### Test Scenario 3: CPU-Bound Computation (100 VUs / 30s / 10,000 Iterated SHA-256)
 
-> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host.
+> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host  
+> **Workload:** 100 VUs | **Duration:** 30s | **Test:** `cpu` (10,000 iterated SHA-256 rounds)
 
-```text
-============================================================================================================================================
-|                                                    BENCHMARK SUITE COMPARISON REPORT                                                     |
-============================================================================================================================================
-Workload : 100 VUs | Duration: 30s | Test: cpu (k6/cpu_bound_test.js)
-Limits   : CPU: 2 cores | RAM: 512m
---------------------------------------------------------------------------------------------------------------------------------------------
-| Configuration                                           |    Startup |  Min RAM |  Avg RAM |  Max RAM |       RPS | P95 Latency | Errors |
-|:--------------------------------------------------------|-----------:|---------:|---------:|---------:|----------:|------------:|-------:|
-| Spring Boot 2.0 (Legacy Java 8)                         |  2057.0 ms |   215 MB |   275 MB |   290 MB |     837/s |    492.5 ms |   0.0% |
-| Spring Boot 2.7 (Platform Threads)                      |  1444.0 ms |   282 MB |   319 MB |   328 MB |    1097/s |    284.6 ms |   0.0% |
-| Spring Boot 3.5 (Platform Threads)                      |  1587.0 ms |   298 MB |   330 MB |   334 MB |    1113/s |    239.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual Threads)                       |  1536.0 ms |   175 MB |   194 MB |   198 MB |    1243/s |    116.4 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC)                        |  1423.0 ms |   216 MB |   243 MB |   248 MB |    1231/s |    115.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + Compact)                     |  1525.0 ms |   190 MB |   210 MB |   215 MB |    1221/s |    110.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC + Compact)              |  1508.0 ms |   216 MB |   227 MB |   230 MB |    1235/s |    120.0 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)        |   911.0 ms |   201 MB |   221 MB |   224 MB |    1122/s |    151.5 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Platform Threads)     |    68.0 ms |    37 MB |    45 MB |    78 MB |     387/s |    468.1 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Virtual Threads)      |    65.0 ms |    19 MB |    24 MB |    63 MB |     407/s |    255.6 ms |   0.0% |
-| Spring Boot 4.1 (Platform Threads)                      |  1570.0 ms |   224 MB |   256 MB |   262 MB |    1147/s |    220.1 ms |   0.0% |
-| Spring Boot 4.1 (Virtual Threads)                       |  1675.0 ms |   186 MB |   212 MB |   218 MB |    1277/s |    112.5 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC)                        |  1471.0 ms |   234 MB |   256 MB |   259 MB |    1268/s |    109.8 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + Compact)                     |  1584.0 ms |   184 MB |   209 MB |   217 MB |    1241/s |    113.6 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC + Compact)              |  1592.0 ms |   234 MB |   256 MB |   259 MB |    1267/s |    112.2 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)  |   598.0 ms |   229 MB |   243 MB |   246 MB |    1299/s |    108.7 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Platform Threads)     |    74.0 ms |    37 MB |    42 MB |    79 MB |     387/s |    475.4 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Virtual Threads)      |    66.0 ms |    20 MB |    25 MB |    63 MB |     412/s |    253.1 ms |   0.0% |
-| Go 1.27 (Echo v5)                                       |     3.8 ms |    13 MB |    15 MB |    16 MB |    1025/s |    372.3 ms |   0.0% |
-============================================================================================================================================
-```
+| Configuration                                          |   Startup | Min RAM | Avg RAM | Max RAM |    RPS | P95 Latency | Errors |
+|:-------------------------------------------------------|----------:|--------:|--------:|--------:|-------:|------------:|-------:|
+| Spring Boot 2.0 (Legacy Java 8)                        | 2057.0 ms |  215 MB |  275 MB |  290 MB |  837/s |    492.5 ms |   0.0% |
+| Spring Boot 2.7 (Platform Threads)                     | 1444.0 ms |  282 MB |  319 MB |  328 MB | 1097/s |    284.6 ms |   0.0% |
+| Spring Boot 3.5 (Platform Threads)                     | 1587.0 ms |  298 MB |  330 MB |  334 MB | 1113/s |    239.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual Threads)                      | 1536.0 ms |  175 MB |  194 MB |  198 MB | 1243/s |    116.4 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC)                       | 1423.0 ms |  216 MB |  243 MB |  248 MB | 1231/s |    115.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + Compact)                    | 1525.0 ms |  190 MB |  210 MB |  215 MB | 1221/s |    110.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC + Compact)             | 1508.0 ms |  216 MB |  227 MB |  230 MB | 1235/s |    120.0 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)       |  911.0 ms |  201 MB |  221 MB |  224 MB | 1122/s |    151.5 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Platform Threads)    |   68.0 ms |   37 MB |   45 MB |   78 MB |  387/s |    468.1 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Virtual Threads)     |   65.0 ms |   19 MB |   24 MB |   63 MB |  407/s |    255.6 ms |   0.0% |
+| Spring Boot 4.1 (Platform Threads)                     | 1570.0 ms |  224 MB |  256 MB |  262 MB | 1147/s |    220.1 ms |   0.0% |
+| Spring Boot 4.1 (Virtual Threads)                      | 1675.0 ms |  186 MB |  212 MB |  218 MB | 1277/s |    112.5 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC)                       | 1471.0 ms |  234 MB |  256 MB |  259 MB | 1268/s |    109.8 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + Compact)                    | 1584.0 ms |  184 MB |  209 MB |  217 MB | 1241/s |    113.6 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC + Compact)             | 1592.0 ms |  234 MB |  256 MB |  259 MB | 1267/s |    112.2 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact) |  598.0 ms |  229 MB |  243 MB |  246 MB | 1299/s |    108.7 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Platform Threads)    |   74.0 ms |   37 MB |   42 MB |   79 MB |  387/s |    475.4 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Virtual Threads)     |   66.0 ms |   20 MB |   25 MB |   63 MB |  412/s |    253.1 ms |   0.0% |
+| Go 1.27 (Echo v5)                                      |    3.8 ms |   13 MB |   15 MB |   16 MB | 1025/s |    372.3 ms |   0.0% |
 
 > **📌 Standout Metrics & Highlights:**
 > - 🏆 **Highest Raw Compute Throughput:** `Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)` (**`1,299 RPS`**, **
@@ -298,38 +274,30 @@ Limits   : CPU: 2 cores | RAM: 512m
 
 ### Test Scenario 4: High Concurrency CPU-Bound Scale Test (1000 VUs / 30s / 10,000 Iterated SHA-256)
 
-> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host.
+> **Environment:** Docker Containers (`--cpus 2 --memory 512m`) on Apple Silicon Host  
+> **Workload:** 1000 VUs | **Duration:** 30s | **Test:** `cpu` (10,000 iterated SHA-256 rounds)
 
-```text
-============================================================================================================================================
-|                                                    BENCHMARK SUITE COMPARISON REPORT                                                     |
-============================================================================================================================================
-Workload : 1000 VUs | Duration: 30s | Test: cpu (k6/cpu_bound_test.js)
-Limits   : CPU: 2 cores | RAM: 512m
---------------------------------------------------------------------------------------------------------------------------------------------
-| Configuration                                           |    Startup |  Min RAM |  Avg RAM |  Max RAM |       RPS | P95 Latency | Errors |
-|:--------------------------------------------------------|-----------:|---------:|---------:|---------:|----------:|------------:|-------:|
-| Spring Boot 2.0 (Legacy Java 8)                         |  2128.0 ms |   228 MB |   312 MB |   336 MB |     862/s |   2695.5 ms |   0.0% |
-| Spring Boot 2.7 (Platform Threads)                      |  1351.0 ms |   227 MB |   302 MB |   312 MB |    1124/s |   1815.1 ms |   0.1% |
-| Spring Boot 3.5 (Platform Threads)                      |  1505.0 ms |   232 MB |   320 MB |   342 MB |    1099/s |   1815.4 ms |   0.1% |
-| Spring Boot 3.5 (Virtual Threads)                       |  1561.0 ms |   207 MB |   229 MB |   239 MB |    1220/s |   1160.3 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC)                        |  1653.0 ms |   220 MB |   251 MB |   264 MB |    1027/s |   1289.3 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + Compact)                     |  1489.0 ms |   195 MB |   223 MB |   234 MB |    1160/s |   1220.7 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + G1GC + Compact)              |  1574.0 ms |   220 MB |   258 MB |   267 MB |    1019/s |   1177.9 ms |   0.0% |
-| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)        |   878.0 ms |   231 MB |   243 MB |   252 MB |    1061/s |   1326.7 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Platform Threads)     |    76.0 ms |    81 MB |   105 MB |   160 MB |     386/s |   4295.2 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Virtual Threads)      |    73.0 ms |    30 MB |    43 MB |    88 MB |     407/s |   2504.3 ms |   0.0% |
-| Spring Boot 4.1 (Platform Threads)                      |  1748.0 ms |   222 MB |   305 MB |   323 MB |    1173/s |   1729.6 ms |   0.0% |
-| Spring Boot 4.1 (Virtual Threads)                       |  1725.0 ms |   199 MB |   241 MB |   254 MB |    1254/s |   1075.7 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC)                        |  1500.0 ms |   244 MB |   302 MB |   312 MB |    1245/s |   1098.6 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + Compact)                     |  1520.0 ms |   190 MB |   231 MB |   244 MB |    1284/s |   1027.4 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + G1GC + Compact)              |  1493.0 ms |   237 MB |   292 MB |   300 MB |    1249/s |   1019.3 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)  |   563.0 ms |   237 MB |   270 MB |   288 MB |    1282/s |   1021.0 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Platform Threads)     |    93.0 ms |    72 MB |    92 MB |   144 MB |     388/s |   3987.4 ms |   0.2% |
-| Spring Boot 4.1 (GraalVM Native - Virtual Threads)      |    79.0 ms |    36 MB |    46 MB |    88 MB |     407/s |   2688.4 ms |   0.0% |
-| Go 1.27 (Echo v5)                                       |     5.5 ms |    38 MB |    50 MB |    57 MB |    1102/s |   1485.7 ms |   0.0% |
-============================================================================================================================================
-```
+| Configuration                                          |   Startup | Min RAM | Avg RAM | Max RAM |    RPS | P95 Latency | Errors |
+|:-------------------------------------------------------|----------:|--------:|--------:|--------:|-------:|------------:|-------:|
+| Spring Boot 2.0 (Legacy Java 8)                        | 2128.0 ms |  228 MB |  312 MB |  336 MB |  862/s |   2695.5 ms |   0.0% |
+| Spring Boot 2.7 (Platform Threads)                     | 1351.0 ms |  227 MB |  302 MB |  312 MB | 1124/s |   1815.1 ms |   0.1% |
+| Spring Boot 3.5 (Platform Threads)                     | 1505.0 ms |  232 MB |  320 MB |  342 MB | 1099/s |   1815.4 ms |   0.1% |
+| Spring Boot 3.5 (Virtual Threads)                      | 1561.0 ms |  207 MB |  229 MB |  239 MB | 1220/s |   1160.3 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC)                       | 1653.0 ms |  220 MB |  251 MB |  264 MB | 1027/s |   1289.3 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + Compact)                    | 1489.0 ms |  195 MB |  223 MB |  234 MB | 1160/s |   1220.7 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + G1GC + Compact)             | 1574.0 ms |  220 MB |  258 MB |  267 MB | 1019/s |   1177.9 ms |   0.0% |
+| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)       |  878.0 ms |  231 MB |  243 MB |  252 MB | 1061/s |   1326.7 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Platform Threads)    |   76.0 ms |   81 MB |  105 MB |  160 MB |  386/s |   4295.2 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Virtual Threads)     |   73.0 ms |   30 MB |   43 MB |   88 MB |  407/s |   2504.3 ms |   0.0% |
+| Spring Boot 4.1 (Platform Threads)                     | 1748.0 ms |  222 MB |  305 MB |  323 MB | 1173/s |   1729.6 ms |   0.0% |
+| Spring Boot 4.1 (Virtual Threads)                      | 1725.0 ms |  199 MB |  241 MB |  254 MB | 1254/s |   1075.7 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC)                       | 1500.0 ms |  244 MB |  302 MB |  312 MB | 1245/s |   1098.6 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + Compact)                    | 1520.0 ms |  190 MB |  231 MB |  244 MB | 1284/s |   1027.4 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + G1GC + Compact)             | 1493.0 ms |  237 MB |  292 MB |  300 MB | 1249/s |   1019.3 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact) |  563.0 ms |  237 MB |  270 MB |  288 MB | 1282/s |   1021.0 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Platform Threads)    |   93.0 ms |   72 MB |   92 MB |  144 MB |  388/s |   3987.4 ms |   0.2% |
+| Spring Boot 4.1 (GraalVM Native - Virtual Threads)     |   79.0 ms |   36 MB |   46 MB |   88 MB |  407/s |   2688.4 ms |   0.0% |
+| Go 1.27 (Echo v5)                                      |    5.5 ms |   38 MB |   50 MB |   57 MB | 1102/s |   1485.7 ms |   0.0% |
 
 > **📌 Standout Metrics & Highlights:**
 > - 🏆 **Peak Throughput Under CPU Starvation:** `Spring Boot 4.1 (Virtual + Compact)` (**`1,284 RPS`**, **
@@ -401,29 +369,18 @@ architecture trade-offs:
 
 ### Test Scenario 5: Memory Scaling Investigation (1000 VUs / 30s / I/O-Bound with 1GB RAM)
 
-> **Environment:** Docker Containers (`--cpus 2 --memory 1024m`) on Apple Silicon Host.
->
-> *Investigating how raw throughput scales when total container memory is doubled from 512MB to 1GB, using OpenJDK
-default heap ergonomics (`MaxRAMPercentage=25` → 256MB heap). Even with the 25% default cap, extra OS-level breathing
-room reduces GC frequency for native and CDS configurations. See Scenario 6 for the effect of fully unlocking heap
-allocation.*
+> **Environment:** Docker Containers (`--cpus 2 --memory 1024m`) on Apple Silicon Host  
+> **Workload:** 1000 VUs | **Duration:** 30s | **Test:** `io` (100ms non-blocking delay)  
+> *Investigating how raw throughput scales when memory is doubled from 512MB to 1GB under OpenJDK default heap
+ergonomics (`MaxRAMPercentage=25` → 256MB heap).*
 
-```text
-============================================================================================================================================
-|                                                    BENCHMARK SUITE COMPARISON REPORT                                                     |
-============================================================================================================================================
-Workload : 1000 VUs | Duration: 30s | Test: io (k6/io_bound_test.js)
-Limits   : CPU: 2 cores | RAM: 1024m (1GB)
---------------------------------------------------------------------------------------------------------------------------------------------
-| Configuration                                           |    Startup |  Min RAM |  Avg RAM |  Max RAM |       RPS | P95 Latency | Errors |
-|:--------------------------------------------------------|-----------:|---------:|---------:|---------:|----------:|------------:|-------:|
-| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)        |   973.0 ms |   393 MB |   551 MB |   564 MB |    5687/s |    301.0 ms |   0.0% |
-| Spring Boot 3.5 (GraalVM Native - Virtual Threads)      |    61.0 ms |   223 MB |   323 MB |   483 MB |    5330/s |    264.6 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact)  |   616.0 ms |   364 MB |   541 MB |   552 MB |    7509/s |    226.5 ms |   0.0% |
-| Spring Boot 4.1 (GraalVM Native - Virtual Threads)      |    72.0 ms |   316 MB |   493 MB |   559 MB |    6905/s |    217.9 ms |   0.0% |
-| Go 1.27 (Echo v5)                                       |     4.0 ms |    56 MB |    58 MB |    61 MB |    9674/s |    107.1 ms |   0.0% |
-============================================================================================================================================
-```
+| Configuration                                          |  Startup | Min RAM | Avg RAM | Max RAM |    RPS | P95 Latency | Errors |
+|:-------------------------------------------------------|---------:|--------:|--------:|--------:|-------:|------------:|-------:|
+| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact)       | 973.0 ms |  393 MB |  551 MB |  564 MB | 5687/s |    301.0 ms |   0.0% |
+| Spring Boot 3.5 (GraalVM Native - Virtual Threads)     |  61.0 ms |  223 MB |  323 MB |  483 MB | 5330/s |    264.6 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact) | 616.0 ms |  364 MB |  541 MB |  552 MB | 7509/s |    226.5 ms |   0.0% |
+| Spring Boot 4.1 (GraalVM Native - Virtual Threads)     |  72.0 ms |  316 MB |  493 MB |  559 MB | 6905/s |    217.9 ms |   0.0% |
+| Go 1.27 (Echo v5)                                      |   4.0 ms |   56 MB |   58 MB |   61 MB | 9674/s |    107.1 ms |   0.0% |
 
 > **📌 Standout Metrics & Highlights:**
 > - 🚀 **Spring Boot 4.1 JIT Breakthrough:** Doubling container RAM to 1GB unlocked **`7,509 RPS`** at **`226.5 ms P95`**
@@ -455,26 +412,18 @@ Limits   : CPU: 2 cores | RAM: 1024m (1GB)
 
 ### Test Scenario 6: Production JVM Tuning Benchmark (1000 VUs / 30s / I/O-Bound with 1GB RAM & Tuned Heap)
 
-> **Environment:** Docker Containers (`--cpus 2 --memory 1024m`) on Apple Silicon Host.
->
-> *Investigating the impact of production-grade container JVM heap and adaptive G1GC flags (`MaxRAMPercentage=75`,
-`MaxGCPauseMillis=100`, `G1ReservePercent=15`) vs OpenJDK defaults (`MaxRAMPercentage=25`).*
+> **Environment:** Docker Containers (`--cpus 2 --memory 1024m`) on Apple Silicon Host  
+> **Workload:** 1000 VUs | **Duration:** 30s | **Test:** `io` (100ms non-blocking delay)  
+> **Tuning:**
+> `-XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -XX:MaxGCPauseMillis=100 -XX:G1ReservePercent=15`  
+> *Investigating the impact of production-grade container JVM heap (768MB) and adaptive G1GC ergonomics vs OpenJDK
+defaults (`MaxRAMPercentage=25`).*
 
-```text
-========================================================================================================================================================
-|                                                          BENCHMARK SUITE COMPARISON REPORT                                                           |
-========================================================================================================================================================
-Workload : 1000 VUs | Duration: 30s | Test: io (k6/io_bound_test.js)
-Limits   : CPU: 2 cores | RAM: 1024m (1GB)
-Tuning   : -XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -XX:MaxGCPauseMillis=100 -XX:G1ReservePercent=15
---------------------------------------------------------------------------------------------------------------------------------------------------------
-| Configuration                                                       |    Startup |  Min RAM |  Avg RAM |  Max RAM |       RPS | P95 Latency | Errors |
-|:--------------------------------------------------------------------|-----------:|---------:|---------:|---------:|----------:|------------:|-------:|
-| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact - Tuned Heap)       |   930.0 ms |   494 MB |   903 MB |  1020 MB |    7448/s |    259.3 ms |   0.0% |
-| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact - Tuned Heap) |   604.0 ms |   263 MB |   913 MB |   969 MB |    8326/s |    181.0 ms |   0.0% |
-| Go 1.27 (Echo v5)                                                   |     4.0 ms |    54 MB |    58 MB |    61 MB |    9698/s |    106.2 ms |   0.0% |
-========================================================================================================================================================
-```
+| Configuration                                                       |  Startup | Min RAM | Avg RAM | Max RAM |    RPS | P95 Latency | Errors |
+|:--------------------------------------------------------------------|---------:|--------:|--------:|--------:|-------:|------------:|-------:|
+| Spring Boot 3.5 (Virtual + CDS + G1GC + Compact - Tuned Heap)       | 930.0 ms |  494 MB |  903 MB | 1020 MB | 7448/s |    259.3 ms |   0.0% |
+| Spring Boot 4.1 (Virtual + AOT + CDS + G1GC + Compact - Tuned Heap) | 604.0 ms |  263 MB |  913 MB |  969 MB | 8326/s |    181.0 ms |   0.0% |
+| Go 1.27 (Echo v5)                                                   |   4.0 ms |   54 MB |   58 MB |   61 MB | 9698/s |    106.2 ms |   0.0% |
 
 > **📌 Standout Metrics & Highlights:**
 > - 🏆 **All-Time Peak Java Throughput (`8,326 RPS`):** Applying safe production-grade heap flags
@@ -507,21 +456,15 @@ Tuning   : -XX:InitialRAMPercentage=75.0 -XX:MaxRAMPercentage=75.0 -XX:MaxGCPaus
 Looking at the full matrix across all test scenarios (I/O Baseline, I/O High-Scale, CPU Baseline, CPU High-Scale, 1GB
 RAM Scaling, and Production JVM Tuning), several overarching architectural and business truths emerge:
 
-```text
-+-------------------------------+---------------------+---------------------+---------------------+---------------------+------------------------+---------------------+
-|                                                                   ARCHITECTURAL EVOLUTION SUMMARY                                                                    |
-+-------------------------------+---------------------+---------------------+---------------------+---------------------+------------------------+---------------------+
-| Paradigm / Capability         | SB 2.0 (Java 8)     | SB 2.7 (Java 21)    | SB 3.5 (Java 25)    | SB 4.1 (Java 26)    | SB 3.5/4.1 (Native)    | Go 1.27 (Echo v5)   |
-+-------------------------------+---------------------+---------------------+---------------------+---------------------+------------------------+---------------------+
-| Cold-Start Time               | ~2.1 s (Slowest)    | ~1.3 s              | ~1.4s (CDS: 880ms)  | ~1.4s (AOT: 550ms)  | 65 - 80 ms (Instant)   | ~4 ms (Instant)     |
-| Baseline RAM Footprint        | 240 - 275 MB        | 235 - 319 MB        | 194 - 244 MB        | 209 - 256 MB        | 24 - 150 MB (Lowest)   | 11 - 15 MB          |
-| 1000 VU I/O Capacity          | ~1,937 RPS (523ms)  | ~1,922 RPS (534ms)  | ~1,788 - 7,448 RPS  | ~3,891 - 8,326 RPS  | 6,420 - 6,905 RPS      | ~9,656 - 9,698 RPS  |
-| 1000 VU CPU Computation RPS   | ~862 RPS (2.7s)     | ~1,124 RPS (1.8s)   | ~1,220 RPS (1.1s)   | ~1,299 RPS (108ms)  | ~407 - 412 RPS         | ~1,102 RPS (1.4s)   |
-| Concurrency Model             | 1:1 OS Threads      | 1:1 OS Threads      | Virtual Threads     | Virtual Threads     | Native Virtual Threads | M:N Goroutines      |
-| Object Memory Optimization    | 16B Headers         | 12-16B Headers      | Compact 8B Headers  | Compact 8B Headers  | Substrate Object Model | Flat structs        |
-| AOT & Native Readiness        | None (Full Dynamic) | None (Full Dynamic) | Classic AppCDS      | Spring AOT + Leyden | Full GraalVM Native    | Statically Native   |
-+-------------------------------+---------------------+---------------------+---------------------+---------------------+------------------------+---------------------+
-```
+| Paradigm / Capability           | SB 2.0 (Java 8)     | SB 2.7 (Java 21)    | SB 3.5 (Java 25)   | SB 4.1 (Java 26)       | SB 3.5/4.1 (Native)      | Go 1.27 (Echo v5)      |
+|:--------------------------------|:--------------------|:--------------------|:-------------------|:-----------------------|:-------------------------|:-----------------------|
+| **Cold-Start Time**             | ~2.1 s (Slowest)    | ~1.3 s              | ~1.4s (CDS: 880ms) | ~1.4s (AOT: 550ms)     | **65 - 80 ms** (Instant) | **~4 ms** (Instant)    |
+| **Baseline RAM Footprint**      | 240 - 275 MB        | 235 - 319 MB        | 194 - 244 MB       | 209 - 256 MB           | **24 - 150 MB** (Lowest) | **11 - 15 MB**         |
+| **1000 VU I/O Capacity**        | ~1,937 RPS (523ms)  | ~1,922 RPS (534ms)  | ~1,788 - 7,448 RPS | **~3,891 - 8,326 RPS** | 6,420 - 6,905 RPS        | **~9,656 - 9,698 RPS** |
+| **1000 VU CPU Computation RPS** | ~862 RPS (2.7s)     | ~1,124 RPS (1.8s)   | ~1,220 RPS (1.1s)  | **~1,299 RPS** (108ms) | ~407 - 412 RPS           | ~1,102 RPS (1.4s)      |
+| **Concurrency Model**           | 1:1 OS Threads      | 1:1 OS Threads      | Virtual Threads    | Virtual Threads        | Native Virtual Threads   | M:N Goroutines         |
+| **Object Memory Optimization**  | 16B Headers         | 12-16B Headers      | Compact 8B Headers | Compact 8B Headers     | Substrate Object Model   | Flat structs           |
+| **AOT & Native Readiness**      | None (Full Dynamic) | None (Full Dynamic) | Classic AppCDS     | Spring AOT + Leyden    | Full GraalVM Native      | Statically Native      |
 
 #### 1. Why Modern Java & Spring Boot Deserve a Fresh Look
 
@@ -579,22 +522,16 @@ thread starvation issues:
 Modern cloud-native Java offers two primary Ahead-Of-Time (AOT) acceleration paths. Choosing the right one requires
 understanding their distinct architectural trade-offs:
 
-```text
-+------------------------------+---------------------------------------+----------------------------------------+
-|                                    AOT ACCELERATION COMPARISON MATRIX                                         |
-+------------------------------+---------------------------------------+----------------------------------------+
-| Dimension                    | GraalVM Native Image (AOT Binary)     | Project Leyden / AppCDS & AOT Cache    |
-+------------------------------+---------------------------------------+----------------------------------------+
-| Target Runtime               | Standalone Native ELF/Mach-O Binary   | Standard OpenJDK HotSpot JVM           |
-| Cold-Start Time              | 65 - 80 ms (Near Go-level)            | 300 - 550 ms (~3x - 4x JVM speedup)    |
-| Baseline RSS Memory          | 24 - 46 MB                            | 150 - 200 MB (Shared pages on host)    |
-| Peak Compute / Throughput    | Static AOT (Serial GC without PGO)    | 100% Full HotSpot C2 JIT Throughput    |
-| Build Time & CI/CD Overhead  | 2 - 4 minutes (Heavy Memory: 4-8GB)   | 5 - 10 seconds (Standard JVM run)      |
-| Dynamic Reflection & Proxies | Requires reachability metadata        | 100% Native JVM Compatibility          |
-| Observability (JFR/JMX/APM)  | Limited / requires native agent       | Full standard JVM tooling & agents     |
-| Memory-Mapped Page Sharing   | Individual container pages            | Host OS shares mapped .jsa pages       |
-+------------------------------+---------------------------------------+----------------------------------------+
-```
+| Dimension                        | GraalVM Native Image (AOT Binary)      | Project Leyden / AppCDS & AOT Cache        |
+|:---------------------------------|:---------------------------------------|:-------------------------------------------|
+| **Target Runtime**               | Standalone Native ELF/Mach-O Binary    | Standard OpenJDK HotSpot JVM               |
+| **Cold-Start Time**              | ⚡ **65 - 80 ms** (Near Go-level)      | 🚀 **300 - 550 ms** (~3x - 4x JVM speedup) |
+| **Baseline RSS Memory**          | 🍃 **24 - 46 MB**                      | 📊 **150 - 200 MB** (Shared pages on host) |
+| **Peak Compute / Throughput**    | Static AOT (Serial GC without PGO)     | 🏆 **100% Full HotSpot C2 JIT Throughput** |
+| **Build Time & CI/CD Overhead**  | ⏳ 2 - 4 minutes (Heavy Memory: 4-8GB) | ⚡ 5 - 10 seconds (Standard JVM run)       |
+| **Dynamic Reflection & Proxies** | ⚠️ Requires reachability metadata      | ✅ 100% Native JVM Compatibility           |
+| **Observability (JFR/JMX/APM)**  | ⚠️ Limited / requires native agent     | ✅ Full standard JVM tooling & agents      |
+| **Memory-Mapped Page Sharing**   | Individual container pages             | 💡 Host OS shares mapped `.jsa` pages      |
 
 ---
 
